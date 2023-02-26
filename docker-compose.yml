@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - 8080:3000
+    env_file: .env
+    networks:
+      - slack_network
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    env_file: .env
+    networks:
+      - slack_network
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+
+volumes:
+  postgres_db:
+    # driver: local
+    # driver_opts:
+    # o: bind
+    # type: none
+    # device: /var/lib/docker/volumes/slack_postgres_db/_data
+
+networks:
+  slack_network:
+    driver: bridge
