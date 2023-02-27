@@ -10,7 +10,7 @@ services:
       - /app/node_modules
     ports:
       - 8080:3000
-    env_file: .env
+    env_file: .env.dev
     networks:
       - slack_network
     depends_on:
@@ -22,7 +22,7 @@ services:
     restart: always
     ports:
       - 5432:5432
-    env_file: .env
+    env_file: .env.dev
     networks:
       - slack_network
     volumes:
@@ -30,11 +30,6 @@ services:
 
 volumes:
   postgres_db:
-    # driver: local
-    # driver_opts:
-    # o: bind
-    # type: none
-    # device: /var/lib/docker/volumes/slack_postgres_db/_data
 
 networks:
   slack_network:

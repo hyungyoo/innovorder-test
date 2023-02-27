@@ -1,17 +1,17 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { ConfigModule } from "@nestjs/config";
 import * as joi from "joi";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "./users/users.module";
 import { LoggerMiddleware } from "./middlewares/logger.middleware";
+import * as path from "path";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `env/.env.${process.env.NODE_ENV}`,
+      envFilePath: path.join(__dirname, `.env.${process.env.NODE_ENV}`),
+      ignoreEnvFile: process.env.NODE_ENV === "prod",
       validationSchema: joi.object({
         POSTGRES_HOST: joi.string().required(),
         POSTGRES_PORT: joi.string().required(),
@@ -33,8 +33,8 @@ import { LoggerMiddleware } from "./middlewares/logger.middleware";
     }),
     UsersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
