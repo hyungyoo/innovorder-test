@@ -1,13 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 
 /**
- * CoreEntity has common columns :  id, createdAt, and updatedAt.
+ * CoreEntity has common columns :  id, createdAt and updatedAt.
  */
 @Entity()
 export class CoreEntity {
@@ -18,16 +19,14 @@ export class CoreEntity {
   @ApiProperty({
     example: "2023-03-01T00:00:00.000Z",
     description: "The date and time that this entity was created",
-    required: true,
   })
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "create_at" })
   createdAt: Date;
 
   @ApiProperty({
     example: "2023-03-01T00:00:00.000Z",
     description: "The date and time that this entity was last updated",
-    required: true,
   })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "update_at" })
   updatedAt: Date;
 }

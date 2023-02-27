@@ -5,6 +5,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "./users/users.module";
 import { LoggerMiddleware } from "./middlewares/logger.middleware";
 import * as path from "path";
+import { Users } from "./users/entites/users.entity";
 
 @Module({
   imports: [
@@ -28,8 +29,8 @@ import * as path from "path";
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: process.env.ENV !== "prod",
-      logging: false,
-      entities: [],
+      logging: process.env.NODE_ENV === "dev",
+      entities: [Users],
     }),
     UsersModule,
   ],

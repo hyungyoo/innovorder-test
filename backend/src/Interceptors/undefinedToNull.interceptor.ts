@@ -13,7 +13,7 @@ import { map } from "rxjs/operators";
 @Injectable()
 export class UndefinedToNullInterceptor implements NestInterceptor {
   intercept(
-    context: ExecutionContext,
+    _: ExecutionContext,
     next: CallHandler<any>
   ): Observable<any> | Promise<Observable<any>> {
     return next
