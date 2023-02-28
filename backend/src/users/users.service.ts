@@ -22,7 +22,7 @@ export class UsersService {
    * @param createUserInput
    * @returns Promise<CreateUserOutput>
    */
-  async create(createUserInput: CreateUserInput) {
+  async createUser(createUserInput: CreateUserInput) {
     const isEmailExists = await this.checkEmailExists(createUserInput.email);
     if (isEmailExists) {
       throw new ConflictException("That email already exists for a user");
@@ -52,7 +52,7 @@ export class UsersService {
    * @param updateUserInput
    * @returns Promise<UpdateUserOutput>
    */
-  async update(id: number, updateUserInput: UpdateUserInput) {
+  async updateUser(id: number, updateUserInput: UpdateUserInput) {
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException(`User with ${id} not found`);

@@ -48,10 +48,10 @@ export class Users extends CoreEntity {
   password: string;
 
   /**
-   * hashing the password with bcrypt 
-   * Before a user entity is saved or updated, 
-   * the password of the object is hashed. 
-   * If the password is included in the updateUserDto during an update, 
+   * hashing the password with bcrypt
+   * Before a user entity is saved or updated,
+   * the password of the object is hashed.
+   * If the password is included in the updateUserDto during an update,
    * then the password is hashed
    */
   @BeforeInsert()

@@ -4,7 +4,10 @@ import { Users } from "../entities/user.entity";
 import { PickType } from "@nestjs/swagger";
 
 /**
- * 유저를 생성하기위한 dto
+ * DTO for creating a user:
+ * UserCreateDto: includes fields
+ * such as email, password, firstName and lastName for creating a user
+ * from Users entity
  */
 export class CreateUserInput extends PickType(Users, [
   "email",
@@ -14,7 +17,8 @@ export class CreateUserInput extends PickType(Users, [
 ]) {}
 
 /**
- * 유저생성 서비스의 리턴값 dto
+ * DTO for returning the user creation service result
+ * CoreOutput(success: boolean, status code : number, error or data)
  */
 export class CreateUserOutput extends CoreOutput {
   @IsObject()

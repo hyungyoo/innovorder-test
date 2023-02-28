@@ -2,11 +2,11 @@ import { PartialType } from "@nestjs/swagger";
 import { CreateUserInput, CreateUserOutput } from "./create-user.dto";
 
 /**
- * 유저 업그레이드에 사용될 dto
+ * DTO as a partial type from the createUserInput DTO
  */
 export class UpdateUserInput extends PartialType(CreateUserInput) {}
 
 /**
- * 유저 업그레이드 서비스의 리턴값 dto
+ * DTO from the createUserOutput DTO
  */
 export class UpdateUserOutput extends CreateUserOutput {}

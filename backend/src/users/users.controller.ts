@@ -1,24 +1,20 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Patch,
-  Param,
-  HttpStatus,
-} from "@nestjs/common";
+import { Controller, Post, Body, Patch, Param } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
 import { ApiTags } from "@nestjs/swagger";
+import { VERSION_SWAGGER } from "src/common/constants/core.constants";
 
 @ApiTags("Users")
-@Controller("api/users")
+@Controller(`api/v${VERSION_SWAGGER}/users`)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserInput: CreateUserInput): Promise<CreateUserOutput> {
-    return this.usersService.create(createUserInput);
+  createUser(
+    @Body() createUserInput: CreateUserInput
+  ): Promise<CreateUserOutput> {
+    return this.usersService.createUser(createUserInput);
   }
 
   // @ApiOperation({ summary: "get all users" })
@@ -34,11 +30,11 @@ export class UsersController {
   // }
 
   @Patch(":id")
-  update(
+  updateUser(
     @Param("id") id: string,
     @Body() updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    return this.usersService.update(+id, updateUserInput);
+    return this.usersService.updateUser(+id, updateUserInput);
   }
 
   // @ApiOperation({ summary: "delete user" })
