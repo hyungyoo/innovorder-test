@@ -42,18 +42,23 @@ export class Users extends CoreEntity {
     description: "The user's password",
     required: true,
   })
-  @Column()
+  @Column({ select: false })
   @IsString()
   @IsNotEmpty()
   password: string;
 
+  /**
+   * hashing the password with bcrypt 
+   * Before a user entity is saved or updated, 
+   * the password of the object is hashed. 
+   * If the password is included in the updateUserDto during an update, 
+   * then the password is hashed
+   */
   @BeforeInsert()
   @BeforeUpdate()
   async makeHashedPW(): Promise<void> {
     try {
-      if (!this.password)
-        throw "can not find the password that the user entered";
-      if (!this.password.startsWith("$2")) {
+      if (this.password) {
         const saltRounds = +process.env.SALT_ROUNDS || 10;
         const salt = await bcrypt.genSalt(saltRounds);
         this.password = await bcrypt.hash(this.password, salt);

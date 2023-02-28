@@ -8,5 +8,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {}
 
 export class UpdateUserOutput extends CoreOutput {
   @IsObject()
-  data: Partial<Users>;
+  data: { user: Partial<Users> };
 }

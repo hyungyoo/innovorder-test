@@ -13,7 +13,7 @@ import { HttpExceptionOutput } from "./common/dtos/http-exception.output.dto";
  * The catch method takes exception and host parameters
  * This class is for handling HTTP responses,
  * and separately implemented typing and return for errors of class validator.
- * @returns Response<HttpExceptionOutput>
+ * @returns
  */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -38,14 +38,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return response.status(status).json({
         success: false,
         code: status,
-        data: error.message,
+        error: { message: error.message },
       });
     }
 
     response.status(status).json({
       success: false,
       code: status,
-      data: error.message,
+      error: { message: error.message },
     });
   }
 }

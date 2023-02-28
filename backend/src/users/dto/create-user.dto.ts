@@ -12,5 +12,5 @@ export class CreateUserDto extends PickType(Users, [
 
 export class CreateUserOutput extends CoreOutput {
   @IsObject()
-  data: Partial<Users>;
+  data: { user: Partial<Users> };
 }

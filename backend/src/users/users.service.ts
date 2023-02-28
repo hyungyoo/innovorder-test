@@ -27,14 +27,13 @@ export class UsersService {
     if (isEmailExists) {
       throw new ConflictException("That email already exists for a user");
     }
-    const user = await this.usersRepository.save(
+    const { password, ...createdUser } = await this.usersRepository.save(
       this.usersRepository.create(createUserDto)
     );
-    const { password, ...data } = user;
     return {
       success: true,
       code: HttpStatus.CREATED,
-      data,
+      data: { user: createdUser },
     };
   }
 
@@ -56,7 +55,7 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findUserById(id);
     if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(`User with ${id} not found`);
     }
     if (updateUserDto.email) {
       const isEmailExists = await this.checkEmailExists(updateUserDto.email);
@@ -64,15 +63,16 @@ export class UsersService {
         throw new ConflictException("That email already exists for a user");
       }
     }
-    const { ...data } = await this.usersRepository.save(
+    const { password, ...updatedUser } = await this.usersRepository.save(
       this.usersRepository.create({ ...user, ...updateUserDto })
     );
     return {
       success: true,
       code: HttpStatus.OK,
-      data,
+      data: { user: updatedUser },
     };
   }
+
   /**
    * Checks if email already exists in the database
    * @param email
@@ -83,6 +83,11 @@ export class UsersService {
     return !!user;
   }
 
+  /**
+   * Find and return a user with the given ID
+   * @param id
+   * @returns Users or null
+   */
   async findUserById(id: number) {
     return this.usersRepository.findOne({ where: { id } });
   }
