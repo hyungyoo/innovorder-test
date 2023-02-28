@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entites/core.entity";
 import { Column, Entity } from "typeorm";
 
@@ -22,6 +22,7 @@ export class Users extends CoreEntity {
   })
   @Column()
   @IsString()
+  @IsNotEmpty()
   fistName: string;
 
   @ApiProperty({
@@ -31,6 +32,7 @@ export class Users extends CoreEntity {
   })
   @Column()
   @IsString()
+  @IsNotEmpty()
   lastName: string;
 
   @ApiProperty({
@@ -40,5 +42,6 @@ export class Users extends CoreEntity {
   })
   @Column({ select: false })
   @IsString()
+  @IsNotEmpty()
   password: string;
 }

@@ -1,15 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return "This action adds a new user";
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    // return `This action returns all users`;
+    // throw new BadRequestException("bad request");
+    throw new UnauthorizedException("이미 존재하는 사용자?");
   }
 
   findOne(id: number) {
