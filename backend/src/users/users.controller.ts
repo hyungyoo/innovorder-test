@@ -9,17 +9,7 @@ import {
 import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
-import {
-  ApiBody,
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiOperation,
-  ApiTags,
-} from "@nestjs/swagger";
-import {
-  ConflictResponseSwagger,
-  NotFoundResponseSwagger,
-} from "src/common/dtos/http-exception.output.dto";
+import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Users")
 @Controller("api/users")

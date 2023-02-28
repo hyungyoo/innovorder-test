@@ -1,7 +1,7 @@
 import { CoreOutput } from "src/common/dtos/core-output.dto";
 import { IsObject } from "class-validator";
 import { Users } from "../entities/user.entity";
-import { PickType } from "@nestjs/mapped-types";
+import { PickType } from "@nestjs/swagger";
 
 /**
  * 유저를 생성하기위한 dto
