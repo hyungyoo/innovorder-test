@@ -6,6 +6,11 @@ import { HttpExceptionFilter } from "./http-exception.filter";
 // import * as fs from "fs";
 // import * as https from "https";
 
+/**
+ * validation pipe
+ * http exception filter
+ * swagger
+ */
 async function bootstrap() {
   // const httpsOptions = {
   //   cert: fs.readFileSync("path/to/cert.crt"),

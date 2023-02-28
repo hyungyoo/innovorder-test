@@ -8,6 +8,13 @@ import {
 import { Response } from "express";
 import { HttpExceptionOutput } from "./common/dtos/http-exception.output.dto";
 
+/**
+ * ExceptionFilter class that catches HttpExceptions
+ * The catch method takes exception and host parameters
+ * This class is for handling HTTP responses,
+ * and separately implemented typing and return for errors of class validator.
+ * @returns Response<HttpExceptionOutput>
+ */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(
@@ -22,13 +29,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       | {
           statusCode: HttpStatus.BAD_REQUEST;
           message: string[];
-        }; // class-validator 타이핑
+        };
 
     if (
       typeof error !== "string" &&
       error.statusCode === HttpStatus.BAD_REQUEST
     ) {
-      // class-validator 에러
       return response.status(status).json({
         success: false,
         code: status,

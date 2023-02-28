@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entites/core.entity";
-import { BeforeInsert, Column, Entity } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcryptjs";
 import { HttpException, HttpStatus } from "@nestjs/common";
 
@@ -42,20 +42,22 @@ export class Users extends CoreEntity {
     description: "The user's password",
     required: true,
   })
-  @Column({ select: false })
+  @Column()
   @IsString()
   @IsNotEmpty()
   password: string;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async makeHashedPW(): Promise<void> {
     try {
       if (!this.password)
         throw "can not find the password that the user entered";
-      const saltRounds = +process.env.SALT_ROUNDS || 10;
-      const salt = await bcrypt.genSalt(saltRounds);
-      this.password = await bcrypt.hash(this.password, salt);
-      console.log(`saltRounds is ${saltRounds}`);
+      if (!this.password.startsWith("$2")) {
+        const saltRounds = +process.env.SALT_ROUNDS || 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        this.password = await bcrypt.hash(this.password, salt);
+      }
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
