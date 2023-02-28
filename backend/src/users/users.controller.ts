@@ -11,26 +11,30 @@ import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
 import {
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
-import { HttpExceptionOutput } from "src/common/dtos/http-exception.output.dto";
+import {
+  ConflictResponseSwagger,
+  NotFoundResponseSwagger,
+} from "src/common/dtos/http-exception.output.dto";
 
 @ApiTags("Users")
 @Controller("api/users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     description: "성공적으로 유저 정보를 생성 했습니다.",
     type: CreateUserOutput,
     status: HttpStatus.CREATED,
   })
   @ApiConflictResponse({
     description: "잘못된 요청입니다. 메일의 존재여부를 확인하세요",
-    type: HttpExceptionOutput,
+    type: ConflictResponseSwagger,
     status: HttpStatus.CONFLICT,
   })
   @ApiOperation({
@@ -61,12 +65,12 @@ export class UsersController {
   })
   @ApiNotFoundResponse({
     description: "잘못된 요청입니다. 아이디의 존재여부를 확인하세요",
-    type: HttpExceptionOutput,
+    type: NotFoundResponseSwagger,
     status: HttpStatus.NOT_FOUND,
   })
   @ApiConflictResponse({
     description: "잘못된 요청입니다. 메일의 존재여부를 확인하세요",
-    type: HttpExceptionOutput,
+    type: ConflictResponseSwagger,
     status: HttpStatus.CONFLICT,
   })
   @ApiOperation({

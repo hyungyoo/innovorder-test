@@ -1,25 +1,22 @@
-import { CreateUserOutput } from "./create-user.dto";
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { HttpStatus } from "@nestjs/common";
+import { CreateUserInput, CreateUserOutput } from "./create-user.dto";
+import { IsNumber } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class UpdateUserInput {
-  @ApiProperty({
-    example: "hyungyoo@innovorder.fr",
-    description:
-      "The user-entered user email should be in the correct email format and must be unique",
-    required: true,
-  })
-  @IsEmail()
-  email: string;
+/**
+ * 유저 업그레이드에 사용될 dto
+ */
+export class UpdateUserInput extends CreateUserInput {}
 
+/**
+ * 유저 업그레이드 서비스의 리턴값 dto
+ */
+export class UpdateUserOutput extends CreateUserOutput {
   @ApiProperty({
-    example: "12345",
-    description: "The user's password",
+    example: HttpStatus.OK,
+    description: "코드값",
     required: true,
   })
-  @IsString()
-  @IsNotEmpty()
-  password: string;
+  @IsNumber()
+  code: number;
 }
-
-export class UpdateUserOutput extends CreateUserOutput {}

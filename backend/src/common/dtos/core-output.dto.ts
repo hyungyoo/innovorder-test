@@ -6,7 +6,7 @@ import { IsBoolean, IsNumber } from "class-validator";
  */
 export class CoreOutput {
   @ApiProperty({
-    example: "success",
+    example: true,
     description: "success 불린값",
     required: true,
   })
