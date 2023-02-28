@@ -4,8 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
+import { CreateUserInput } from "./dto/create-user.dto";
+import { UpdateUserInput } from "./dto/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "./entities/user.entity";
 import { Repository } from "typeorm";
@@ -17,18 +17,18 @@ export class UsersService {
   ) {}
 
   /**
-   * It receives createUserDto as an argument
+   * It receives createUserInput as an argument
    * and is responsible for creating a new user
-   * @param createUserDto
+   * @param createUserInput
    * @returns Promise<CreateUserOutput>
    */
-  async create(createUserDto: CreateUserDto) {
-    const isEmailExists = await this.checkEmailExists(createUserDto.email);
+  async create(createUserInput: CreateUserInput) {
+    const isEmailExists = await this.checkEmailExists(createUserInput.email);
     if (isEmailExists) {
       throw new ConflictException("That email already exists for a user");
     }
     const { password, ...createdUser } = await this.usersRepository.save(
-      this.usersRepository.create(createUserDto)
+      this.usersRepository.create(createUserInput)
     );
     return {
       success: true,
@@ -46,25 +46,25 @@ export class UsersService {
   }
 
   /**
-   * It receives updateUserDto and user's id as an argument
+   * It receives updateUserInput and user's id as an argument
    * and is responsible for updating a user
    * @param id
-   * @param updateUserDto
+   * @param updateUserInput
    * @returns Promise<UpdateUserOutput>
    */
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserInput: UpdateUserInput) {
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException(`User with ${id} not found`);
     }
-    if (updateUserDto.email) {
-      const isEmailExists = await this.checkEmailExists(updateUserDto.email);
-      if (isEmailExists && user.email === updateUserDto.email) {
+    if (updateUserInput.email) {
+      const isEmailExists = await this.checkEmailExists(updateUserInput.email);
+      if (isEmailExists && user.email === updateUserInput.email) {
         throw new ConflictException("That email already exists for a user");
       }
     }
     const { password, ...updatedUser } = await this.usersRepository.save(
-      this.usersRepository.create({ ...user, ...updateUserDto })
+      this.usersRepository.create({ ...user, ...updateUserInput })
     );
     return {
       success: true,

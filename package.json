@@ -4,7 +4,9 @@
     "@types/validator": "^13.7.12"
   },
   "dependencies": {
+    "@nestjs/mapped-types": "^1.2.2",
     "bcryptjs": "^2.4.3",
+    "utility-types": "^3.10.0",
     "validator": "^13.9.0"
   }
 }
