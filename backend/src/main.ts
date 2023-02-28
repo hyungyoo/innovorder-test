@@ -16,7 +16,6 @@ async function bootstrap() {
     .setTitle("Innovorder test")
     .setDescription("innovorder test with CRUD")
     .setVersion("1.0")
-    .addTag("test")
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);

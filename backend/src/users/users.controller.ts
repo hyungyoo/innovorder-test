@@ -1,20 +1,44 @@
-import { Controller, Get, Post, UseInterceptors } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.interceptor";
 
-@UseInterceptors(UndefinedToNullInterceptor)
 @ApiTags("Users")
-@Controller("api/users")
+@Controller("users")
 export class UsersController {
-  @Get()
-  getUsers() {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  postUsers() {}
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
-  @Post("login")
-  login() {}
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
 
-  @Post("logout")
-  logout() {}
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.usersService.findOne(+id);
+  }
+
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto);
+  }
+
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.usersService.remove(+id);
+  }
 }

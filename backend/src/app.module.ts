@@ -2,10 +2,10 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import * as joi from "joi";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { UsersModule } from "./users/users.module";
 import { LoggerMiddleware } from "./middlewares/logger.middleware";
+import { UsersModule } from "./users/users.module";
 import * as path from "path";
-import { Users } from "./users/entites/users.entity";
+import { User } from "./users/entities/user.entity";
 
 @Module({
   imports: [
@@ -30,7 +30,8 @@ import { Users } from "./users/entites/users.entity";
       database: process.env.POSTGRES_DB,
       synchronize: process.env.ENV !== "prod",
       logging: process.env.NODE_ENV === "dev",
-      entities: [Users],
+      entities: [User],
+      keepConnectionAlive: true,
     }),
     UsersModule,
   ],

@@ -1,5 +1,10 @@
 import { Injectable, Logger, NestMiddleware } from "@nestjs/common";
 
+/**
+ * A middleware that logs according to HTTP requests
+ * and return logs including the method, original URL, IP address, and user agent of the request,
+ * as well as the content length and status code of the response
+ */
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   private readonly logger = new Logger("HTTP");
