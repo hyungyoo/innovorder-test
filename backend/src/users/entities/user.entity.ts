@@ -1,14 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entites/core.entity";
-import { Column, Entity } from "typeorm";
+import { BeforeInsert, Column, Entity } from "typeorm";
+import * as bcrypt from "bcryptjs";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 @Entity()
 export class Users extends CoreEntity {
   @ApiProperty({
     example: "hyungyoo@innovorder.fr",
     description:
-      "유저가 입력하는 유저의 이메일, 또한 이메일의 형태여야하며, 유니크해야한다",
+      "The user-entered user email should be in the correct email format and must be unique",
     required: true,
   })
   @Column({ unique: true })
@@ -17,17 +19,17 @@ export class Users extends CoreEntity {
 
   @ApiProperty({
     example: "hyungjun",
-    description: "유저가 입력하는 유저의 이름",
+    description: "The user's first name",
     required: true,
   })
   @Column()
   @IsString()
   @IsNotEmpty()
-  fistName: string;
+  firstName: string;
 
   @ApiProperty({
     example: "yoo",
-    description: "유저가 입력하는 유저의 성",
+    description: "The user's last name",
     required: true,
   })
   @Column()
@@ -37,11 +39,25 @@ export class Users extends CoreEntity {
 
   @ApiProperty({
     example: "12345",
-    description: "유저가 입력하는 비밀번호",
+    description: "The user's password",
     required: true,
   })
   @Column({ select: false })
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @BeforeInsert()
+  async makeHashedPW(): Promise<void> {
+    try {
+      if (!this.password)
+        throw "can not find the password that the user entered";
+      const saltRounds = +process.env.SALT_ROUNDS || 10;
+      const salt = await bcrypt.genSalt(saltRounds);
+      this.password = await bcrypt.hash(this.password, salt);
+      console.log(`saltRounds is ${saltRounds}`);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

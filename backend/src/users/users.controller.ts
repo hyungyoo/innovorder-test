@@ -8,7 +8,7 @@ import {
   Delete,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
+import { CreateUserDto, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
@@ -19,7 +19,7 @@ export class UsersController {
 
   @ApiOperation({ summary: "create user" })
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto): Promise<CreateUserOutput> {
     return this.usersService.create(createUserDto);
   }
 

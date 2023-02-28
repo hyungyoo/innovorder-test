@@ -19,6 +19,7 @@ import { Users } from "./users/entities/user.entity";
         POSTGRES_PASSWORD: joi.string().required(),
         POSTGRES_USERNAME: joi.string().required(),
         POSTGRES_DB: joi.string().required(),
+        SALT_ROUNDS: joi.string(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -29,7 +30,8 @@ import { Users } from "./users/entities/user.entity";
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: process.env.ENV !== "prod",
-      logging: process.env.NODE_ENV === "dev",
+      // logging: process.env.NODE_ENV === "dev",
+      logging: false,
       entities: [Users],
       keepConnectionAlive: true,
     }),
