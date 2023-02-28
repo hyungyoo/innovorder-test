@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsObject,
   IsString,
+  Length,
 } from "class-validator";
 import { Users } from "../entities/user.entity";
 import { HttpStatus } from "@nestjs/common";
@@ -43,10 +44,11 @@ export class CreateUserInput {
 
   @ApiProperty({
     example: "12345",
-    description: "The user's password",
+    description: "The user's password (must be at least 8 characters long)",
     required: true,
   })
   @IsString()
+  @Length(8)
   @IsNotEmpty()
   password: string;
 }

@@ -10,6 +10,7 @@ import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
 import {
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -41,6 +42,7 @@ export class UsersController {
     summary: "Creates a new user",
     description: "이메일, 성, 이름, 비밀번호를 받아 유저를 생성 합니다.",
   })
+  @ApiBody({ type: CreateUserInput })
   @Post()
   create(@Body() createUserInput: CreateUserInput): Promise<CreateUserOutput> {
     return this.usersService.create(createUserInput);
@@ -79,6 +81,7 @@ export class UsersController {
       "이메일, 성, 이름, 비밀번호중에 수정을 원하는 정보를 받아 유저 정보를 업데이트합니다",
   })
   @Patch(":id")
+  @ApiBody({ type: UpdateUserInput })
   update(
     @Param("id") id: string,
     @Body() updateUserInput: UpdateUserInput
