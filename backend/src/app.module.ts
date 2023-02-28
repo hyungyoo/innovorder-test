@@ -5,7 +5,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { LoggerMiddleware } from "./middlewares/logger.middleware";
 import { UsersModule } from "./users/users.module";
 import * as path from "path";
-import { User } from "./users/entities/user.entity";
+import { Users } from "./users/entities/user.entity";
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { User } from "./users/entities/user.entity";
       database: process.env.POSTGRES_DB,
       synchronize: process.env.ENV !== "prod",
       logging: process.env.NODE_ENV === "dev",
-      entities: [User],
+      entities: [Users],
       keepConnectionAlive: true,
     }),
     UsersModule,
