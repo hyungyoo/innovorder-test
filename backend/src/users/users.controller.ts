@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Patch, Param } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Param,
+  ParseIntPipe,
+} from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
@@ -51,10 +58,10 @@ export class UsersController {
   })
   @Patch(":id")
   updateUser(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body() updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    return this.usersService.updateUser(+id, updateUserInput);
+    return this.usersService.updateUser(id, updateUserInput);
   }
 
   // @ApiOperation({ summary: "delete user" })

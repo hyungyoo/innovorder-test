@@ -88,7 +88,7 @@ export class UsersService {
    * @param id
    * @returns Users or null
    */
-  async findUserById(id: number) {
+  findUserById(id: number) {
     return this.usersRepository.findOne({ where: { id } });
   }
 }

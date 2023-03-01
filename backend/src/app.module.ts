@@ -19,7 +19,6 @@ import { Users } from "./users/entities/user.entity";
         POSTGRES_PASSWORD: joi.string().required(),
         POSTGRES_USERNAME: joi.string().required(),
         POSTGRES_DB: joi.string().required(),
-        SALT_ROUNDS: joi.string(),
       }),
     }),
     TypeOrmModule.forRoot({

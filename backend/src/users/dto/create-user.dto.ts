@@ -22,5 +22,5 @@ export class CreateUserInput extends PickType(Users, [
  */
 export class CreateUserOutput extends CoreOutput {
   @IsObject()
-  data: { user: Omit<Users, "password" | "makeHashedPW"> };
+  data: { user: Omit<Users, "password" | "hashPassword"> };
 }
