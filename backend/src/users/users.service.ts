@@ -37,14 +37,6 @@ export class UsersService {
     };
   }
 
-  async findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
   /**
    * It receives updateUserInput and user's id as an argument
    * and is responsible for updating a user.
@@ -92,3 +84,11 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 }
+
+// async findAll() {
+//   return `This action returns all users`;
+// }
+
+// findOne(id: number) {
+//   return `This action returns a #${id} user`;
+// }

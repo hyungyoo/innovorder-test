@@ -16,12 +16,14 @@ export class CreateUserInput extends PickType(Users, [
   "password",
 ]) {}
 
+export class UserWithoutPassword extends OmitType(Users, ["password"]) {}
+
 /**
  * DTO for returning the user creation service result
  * CoreOutput(success: boolean, status code : number, error or data)
  */
 export class CreateUserOutput extends CoreOutput {
-  @ApiProperty({ type: OmitType(Users, ["password"]) })
+  @ApiProperty({ type: UserWithoutPassword })
   @IsObject()
   data: { user: Omit<Users, "password" | "hashPassword"> };
 }

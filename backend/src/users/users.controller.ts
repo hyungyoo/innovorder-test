@@ -27,18 +27,6 @@ export class UsersController {
     return this.usersService.createUser(createUserInput);
   }
 
-  // @ApiOperation({ summary: "get all users" })
-  // @Get()
-  // findAll() {
-  //   return this.usersService.findAll();
-  // }
-
-  // @ApiOperation({ summary: "get user by user id" })
-  // @Get(":id")
-  // findOne(@Param("id") id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
-
   @CustomUserUpdate()
   @Patch(":id")
   updateUser(
@@ -47,10 +35,22 @@ export class UsersController {
   ): Promise<UpdateUserOutput> {
     return this.usersService.updateUser(id, updateUserInput);
   }
-
-  // @ApiOperation({ summary: "delete user" })
-  // @Delete(":id")
-  // remove(@Param("id") id: string) {
-  //   return this.usersService.remove(+id);
-  // }
 }
+
+// @ApiOperation({ summary: "get all users" })
+// @Get()
+// findAll() {
+//   return this.usersService.findAll();
+// }
+
+// @ApiOperation({ summary: "get user by user id" })
+// @Get(":id")
+// findOne(@Param("id") id: string) {
+//   return this.usersService.findOne(+id);
+// }
+
+// @ApiOperation({ summary: "delete user" })
+// @Delete(":id")
+// remove(@Param("id") id: string) {
+//   return this.usersService.remove(+id);
+// }
