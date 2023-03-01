@@ -9,11 +9,13 @@ import {
 import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
 import { VERSION_SWAGGER } from "src/common/constants/core.constants";
 import { CustomUserCreate } from "src/users/decorators/create-user.decorators";
 import { CustomUserUpdate } from "src/users/decorators/update-user.decorator";
+import { Users } from "./entities/user.entity";
 
+@ApiExtraModels(Users)
 @ApiTags("Users")
 @Controller(`api/v${VERSION_SWAGGER}/users`)
 export class UsersController {

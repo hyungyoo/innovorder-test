@@ -4,16 +4,19 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
 import {
   UserApiConflictResponse,
   UserApiOkResponse,
   UserNotFoundResponse,
+  UserUnprocessableEntity,
 } from "../swagger/user.swagger";
 import {
   USER_CONFLICT_RESPONSE,
   USER_NOT_FOUND,
   USER_OK_RESPONSE,
+  USER_UNPROCESSABLE_ENTITY,
 } from "src/common/constants/user.constants";
 
 export const CustomUserUpdate = (): MethodDecorator => {
@@ -35,6 +38,11 @@ export const CustomUserUpdate = (): MethodDecorator => {
     ApiNotFoundResponse({
       description: USER_NOT_FOUND,
       type: UserNotFoundResponse,
+    })(target, propertyKey, descriptor);
+
+    ApiUnprocessableEntityResponse({
+      description: USER_UNPROCESSABLE_ENTITY,
+      type: UserUnprocessableEntity,
     })(target, propertyKey, descriptor);
 
     ApiParam({ name: "id", description: "user's id" })(

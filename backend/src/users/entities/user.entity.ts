@@ -5,6 +5,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcryptjs";
 import { UnprocessableEntityException } from "@nestjs/common";
 import { SALT_ROUNDS } from "src/common/constants/core.constants";
+import { USER_UNPROCESSABLE_ENTITY } from "src/common/constants/user.constants";
 
 @Entity()
 export class Users extends CoreEntity {
@@ -65,7 +66,8 @@ export class Users extends CoreEntity {
         this.password = await bcrypt.hash(this.password, salt);
       }
     } catch (error) {
-      throw new UnprocessableEntityException("Error hashing password");
+      console.log(error);
+      throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
     }
   }
 }

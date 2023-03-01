@@ -16,6 +16,9 @@ export class CreateUserInput extends PickType(Users, [
   "password",
 ]) {}
 
+/**
+ * user type for response.
+ */
 export class UserWithoutPassword extends OmitType(Users, ["password"]) {}
 
 /**

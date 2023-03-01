@@ -4,3 +4,4 @@ export const USER_CREATED_RESPONSE =
 export const USER_OK_RESPONSE = "User information was updated successfully";
 export const USER_NOT_FOUND =
   "The user corresponding to the given ID does not exis";
+export const USER_UNPROCESSABLE_ENTITY = "Error hashing password";

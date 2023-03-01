@@ -6,6 +6,7 @@ import { HttpStatus } from "@nestjs/common";
 import {
   USER_CONFLICT_RESPONSE,
   USER_NOT_FOUND,
+  USER_UNPROCESSABLE_ENTITY,
 } from "src/common/constants/user.constants";
 import { UpdateUserOutput } from "../dto/update-user.dto";
 
@@ -53,6 +54,26 @@ export class UserNotFoundResponse extends HttpExceptionOutput {
   @ApiProperty({
     example: { message: USER_NOT_FOUND },
     description: "Error message from http execption filter",
+    required: true,
+  })
+  @IsString({ each: true })
+  error: {
+    message: string | string[];
+  };
+}
+
+export class UserUnprocessableEntity extends HttpExceptionOutput {
+  @ApiProperty({
+    example: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: "Status code value",
+    required: true,
+  })
+  @IsNumber()
+  code: number;
+
+  @ApiProperty({
+    example: { message: USER_UNPROCESSABLE_ENTITY },
+    description: USER_UNPROCESSABLE_ENTITY,
     required: true,
   })
   @IsString({ each: true })
