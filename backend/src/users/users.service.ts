@@ -18,11 +18,11 @@ export class UsersService {
 
   /**
    * It receives createUserInput as an argument
-   * and is responsible for creating a new user
+   * and is responsible for creating a new user.
    * @param createUserInput
    * @returns Promise<CreateUserOutput>
    */
-  async create(createUserInput: CreateUserInput) {
+  async createUser(createUserInput: CreateUserInput) {
     const isEmailExists = await this.checkEmailExists(createUserInput.email);
     if (isEmailExists) {
       throw new ConflictException("That email already exists for a user");
@@ -47,12 +47,12 @@ export class UsersService {
 
   /**
    * It receives updateUserInput and user's id as an argument
-   * and is responsible for updating a user
+   * and is responsible for updating a user.
    * @param id
    * @param updateUserInput
    * @returns Promise<UpdateUserOutput>
    */
-  async update(id: number, updateUserInput: UpdateUserInput) {
+  async updateUser(id: number, updateUserInput: UpdateUserInput) {
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException(`User with ${id} not found`);
@@ -88,7 +88,7 @@ export class UsersService {
    * @param id
    * @returns Users or null
    */
-  async findUserById(id: number) {
+  findUserById(id: number) {
     return this.usersRepository.findOne({ where: { id } });
   }
 }

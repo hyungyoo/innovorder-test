@@ -4,48 +4,27 @@ import {
   Body,
   Patch,
   Param,
-  HttpStatus,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dto/update-user.dto";
-import {
-  ApiBody,
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from "@nestjs/swagger";
-import {
-  ConflictResponseSwagger,
-  NotFoundResponseSwagger,
-} from "src/common/dtos/http-exception.output.dto";
+import { ApiTags } from "@nestjs/swagger";
+import { VERSION_SWAGGER } from "src/common/constants/core.constants";
+import { CustomUserCreate } from "src/users/decorators/create-user.decorators";
+import { CustomUserUpdate } from "src/users/decorators/update-user.decorator";
 
 @ApiTags("Users")
-@Controller("api/users")
+@Controller(`api/v${VERSION_SWAGGER}/users`)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiCreatedResponse({
-    description: "성공적으로 유저 정보를 생성 했습니다.",
-    type: CreateUserOutput,
-    status: HttpStatus.CREATED,
-  })
-  @ApiConflictResponse({
-    description: "잘못된 요청입니다. 메일의 존재여부를 확인하세요",
-    type: ConflictResponseSwagger,
-    status: HttpStatus.CONFLICT,
-  })
-  @ApiOperation({
-    summary: "Creates a new user",
-    description: "이메일, 성, 이름, 비밀번호를 받아 유저를 생성 합니다.",
-  })
-  @ApiBody({ type: CreateUserInput })
+  @CustomUserCreate()
   @Post()
-  create(@Body() createUserInput: CreateUserInput): Promise<CreateUserOutput> {
-    return this.usersService.create(createUserInput);
+  createUser(
+    @Body() createUserInput: CreateUserInput
+  ): Promise<CreateUserOutput> {
+    return this.usersService.createUser(createUserInput);
   }
 
   // @ApiOperation({ summary: "get all users" })
@@ -60,33 +39,13 @@ export class UsersController {
   //   return this.usersService.findOne(+id);
   // }
 
-  @ApiOkResponse({
-    description: "성공적으로 유저 정보를 업데이트 했습니다.",
-    type: UpdateUserOutput,
-    status: HttpStatus.OK,
-  })
-  @ApiNotFoundResponse({
-    description: "잘못된 요청입니다. 아이디의 존재여부를 확인하세요",
-    type: NotFoundResponseSwagger,
-    status: HttpStatus.NOT_FOUND,
-  })
-  @ApiConflictResponse({
-    description: "잘못된 요청입니다. 메일의 존재여부를 확인하세요",
-    type: ConflictResponseSwagger,
-    status: HttpStatus.CONFLICT,
-  })
-  @ApiOperation({
-    summary: "update user",
-    description:
-      "이메일, 성, 이름, 비밀번호중에 수정을 원하는 정보를 받아 유저 정보를 업데이트합니다",
-  })
+  @CustomUserUpdate()
   @Patch(":id")
-  @ApiBody({ type: UpdateUserInput })
-  update(
-    @Param("id") id: string,
+  updateUser(
+    @Param("id", ParseIntPipe) id: number,
     @Body() updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    return this.usersService.update(+id, updateUserInput);
+    return this.usersService.updateUser(id, updateUserInput);
   }
 
   // @ApiOperation({ summary: "delete user" })

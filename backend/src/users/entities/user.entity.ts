@@ -3,7 +3,8 @@ import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entites/core.entity";
 import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcryptjs";
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { UnprocessableEntityException } from "@nestjs/common";
+import { SALT_ROUNDS } from "src/common/constants/core.constants";
 
 @Entity()
 export class Users extends CoreEntity {
@@ -48,23 +49,23 @@ export class Users extends CoreEntity {
   password: string;
 
   /**
-   * hashing the password with bcrypt 
-   * Before a user entity is saved or updated, 
-   * the password of the object is hashed. 
-   * If the password is included in the updateUserDto during an update, 
+   * hashing the password with bcrypt
+   * Before a user entity is saved or updated,
+   * the password of the object is hashed.
+   * If the password is included in the updateUserDto during an update,
    * then the password is hashed
+   * If bcrypt throws an error, raise an UnprocessableEntityException.
    */
   @BeforeInsert()
   @BeforeUpdate()
-  async makeHashedPW(): Promise<void> {
+  async hashPassword(): Promise<void> {
     try {
       if (this.password) {
-        const saltRounds = +process.env.SALT_ROUNDS || 10;
-        const salt = await bcrypt.genSalt(saltRounds);
+        const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.password = await bcrypt.hash(this.password, salt);
       }
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new UnprocessableEntityException("Error hashing password");
     }
   }
 }
