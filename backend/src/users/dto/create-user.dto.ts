@@ -1,7 +1,7 @@
 import { CoreOutput } from "src/common/dtos/core-output.dto";
 import { IsObject } from "class-validator";
 import { Users } from "../entities/user.entity";
-import { PickType } from "@nestjs/swagger";
+import { ApiProperty, OmitType, PickType } from "@nestjs/swagger";
 
 /**
  * DTO for creating a user:
@@ -21,6 +21,7 @@ export class CreateUserInput extends PickType(Users, [
  * CoreOutput(success: boolean, status code : number, error or data)
  */
 export class CreateUserOutput extends CoreOutput {
+  @ApiProperty({ type: OmitType(Users, ["password"]) })
   @IsObject()
   data: { user: Omit<Users, "password" | "hashPassword"> };
 }

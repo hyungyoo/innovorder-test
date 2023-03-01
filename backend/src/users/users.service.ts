@@ -18,7 +18,7 @@ export class UsersService {
 
   /**
    * It receives createUserInput as an argument
-   * and is responsible for creating a new user
+   * and is responsible for creating a new user.
    * @param createUserInput
    * @returns Promise<CreateUserOutput>
    */
@@ -47,7 +47,7 @@ export class UsersService {
 
   /**
    * It receives updateUserInput and user's id as an argument
-   * and is responsible for updating a user
+   * and is responsible for updating a user.
    * @param id
    * @param updateUserInput
    * @returns Promise<UpdateUserOutput>

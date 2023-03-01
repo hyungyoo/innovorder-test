@@ -54,6 +54,7 @@ export class Users extends CoreEntity {
    * the password of the object is hashed.
    * If the password is included in the updateUserDto during an update,
    * then the password is hashed
+   * If bcrypt throws an error, raise an UnprocessableEntityException.
    */
   @BeforeInsert()
   @BeforeUpdate()

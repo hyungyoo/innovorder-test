@@ -14,7 +14,7 @@ export class CoreOutput {
   success: boolean;
 
   @ApiProperty({
-    example: "code",
+    example: 201,
     description: "Status code value",
     required: true,
   })
