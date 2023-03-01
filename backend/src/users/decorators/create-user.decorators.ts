@@ -8,12 +8,12 @@ import {
   UserApiConflictResponse,
   UserApiCreatedResponse,
   UserUnprocessableEntity,
-} from "../swagger/user.swagger";
+} from "../swaggers/user.swagger";
 import {
   USER_CONFLICT_RESPONSE,
   USER_CREATED_RESPONSE,
   USER_UNPROCESSABLE_ENTITY,
-} from "src/common/constants/user.constants";
+} from "src/users/constants/user.constants";
 
 export const CustomUserCreate = (): MethodDecorator => {
   return (
