@@ -6,6 +6,7 @@ import { LoggerMiddleware } from "./middlewares/logger.middleware";
 import { UsersModule } from "./users/users.module";
 import * as path from "path";
 import { Users } from "./users/entities/user.entity";
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { Users } from "./users/entities/user.entity";
       keepConnectionAlive: true,
     }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
