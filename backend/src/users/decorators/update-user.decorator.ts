@@ -11,13 +11,13 @@ import {
   UserApiOkResponse,
   UserNotFoundResponse,
   UserUnprocessableEntity,
-} from "../swagger/user.swagger";
+} from "../swaggers/user.swagger";
 import {
   USER_CONFLICT_RESPONSE,
   USER_NOT_FOUND,
   USER_OK_RESPONSE,
   USER_UNPROCESSABLE_ENTITY,
-} from "src/common/constants/user.constants";
+} from "src/users/constants/user.constants";
 
 export const CustomUserUpdate = (): MethodDecorator => {
   return (
@@ -52,7 +52,7 @@ export const CustomUserUpdate = (): MethodDecorator => {
     );
 
     ApiOperation({
-      summary: "Creates a new user",
+      summary: "Update user information using user ID",
       description:
         "Find the user corresponding to the user ID and update the user",
     })(target, propertyKey, descriptor);

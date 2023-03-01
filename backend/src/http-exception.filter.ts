@@ -31,6 +31,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
           message: string[];
         };
 
+    console.log("*****************EXCEPTION FILTER*****************");
+
     if (
       typeof error !== "string" &&
       error.statusCode === HttpStatus.BAD_REQUEST
