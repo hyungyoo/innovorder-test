@@ -52,7 +52,7 @@ export const CustomUserUpdate = (): MethodDecorator => {
     );
 
     ApiOperation({
-      summary: "Creates a new user",
+      summary: "Update user information using user ID",
       description:
         "Find the user corresponding to the user ID and update the user",
     })(target, propertyKey, descriptor);
