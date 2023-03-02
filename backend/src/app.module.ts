@@ -22,6 +22,10 @@ import { AuthModule } from "./auth/auth.module";
         POSTGRES_DB: joi.string().required(),
         APP_PORT: joi.string(),
         BACKEND_PORT: joi.string(),
+        JWT_ACCESS_SECRET: joi.string().required(),
+        JWT_REFRESH_SECRET: joi.string().required(),
+        JWT_ACCESS_EXPIRATION_TIME: joi.string().required(),
+        JWT_REFRESH_EXPIRATION_TIME: joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
