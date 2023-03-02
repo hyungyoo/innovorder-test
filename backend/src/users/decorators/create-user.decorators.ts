@@ -1,4 +1,5 @@
 import {
+  ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOperation,
@@ -7,9 +8,11 @@ import {
 import {
   UserApiConflictResponse,
   UserApiCreatedResponse,
+  UserBadRequestResponse,
   UserUnprocessableEntity,
 } from "../swaggers/user.swagger";
 import {
+  USER_BAD_REQUEST_RESPONSE,
   USER_CONFLICT_RESPONSE,
   USER_CREATED_RESPONSE,
   USER_UNPROCESSABLE_ENTITY,
@@ -34,6 +37,11 @@ export const CustomUserCreate = (): MethodDecorator => {
     ApiUnprocessableEntityResponse({
       description: USER_UNPROCESSABLE_ENTITY,
       type: UserUnprocessableEntity,
+    })(target, propertyKey, descriptor);
+
+    ApiBadRequestResponse({
+      description: USER_BAD_REQUEST_RESPONSE,
+      type: UserBadRequestResponse,
     })(target, propertyKey, descriptor);
 
     ApiOperation({

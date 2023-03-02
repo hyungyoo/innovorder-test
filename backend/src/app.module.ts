@@ -7,8 +7,6 @@ import { UsersModule } from "./users/users.module";
 import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
-import { APP_FILTER } from "@nestjs/core";
-import { HttpExceptionFilter } from "./http-exception.filter";
 
 @Module({
   imports: [

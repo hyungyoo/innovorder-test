@@ -4,8 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { CreateUserInput } from "./dtos/create-user.dto";
-import { UpdateUserInput } from "./dtos/update-user.dto";
+import { CreateUserInput, CreateUserOutput } from "./dtos/create-user.dto";
+import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "./entities/user.entity";
 import { Repository } from "typeorm";
@@ -22,15 +22,19 @@ export class UsersService {
    * @param createUserInput
    * @returns Promise<CreateUserOutput>
    */
-  async createUser(createUserInput: CreateUserInput) {
+  async createUser(
+    createUserInput: CreateUserInput
+  ): Promise<CreateUserOutput> {
     console.log("*****************SERVICE*****************");
     const isEmailExists = await this.checkEmailExists(createUserInput.email);
     if (isEmailExists) {
       throw new ConflictException("That email already exists for a user");
     }
-    const { password, ...createdUser } = await this.usersRepository.save(
-      this.usersRepository.create(createUserInput)
-    );
+    const { password, refreshToken, ...createdUser } =
+      await this.usersRepository.save(
+        this.usersRepository.create(createUserInput)
+      );
+    console.log(createdUser);
     return {
       success: true,
       code: HttpStatus.CREATED,
@@ -45,7 +49,10 @@ export class UsersService {
    * @param updateUserInput
    * @returns Promise<UpdateUserOutput>
    */
-  async updateUser(id: number, updateUserInput: UpdateUserInput) {
+  async updateUser(
+    id: number,
+    updateUserInput: UpdateUserInput
+  ): Promise<UpdateUserOutput> {
     console.log("*****************SERVICE*****************");
     const user = await this.findUserById(id);
     if (!user) {
@@ -57,9 +64,11 @@ export class UsersService {
         throw new ConflictException("That email already exists for a user");
       }
     }
-    const { password, ...updatedUser } = await this.usersRepository.save(
-      this.usersRepository.create({ ...user, ...updateUserInput })
-    );
+    const { password, refreshToken, ...updatedUser } =
+      await this.usersRepository.save(
+        this.usersRepository.create({ ...user, ...updateUserInput })
+      );
+    console.log(updatedUser);
     return {
       success: true,
       code: HttpStatus.OK,
@@ -86,6 +95,18 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 // async findAll() {
 //   return `This action returns all users`;

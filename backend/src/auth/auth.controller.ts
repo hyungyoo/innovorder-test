@@ -10,7 +10,7 @@ export class AuthController {
   /**
    * Create and save refresh token in DB
    */
-  @Post("local/login")
+  @Post("login")
   login() {
     return this.authService.login();
   }

@@ -17,6 +17,7 @@ export class Users extends CoreEntity {
   })
   @Column({ unique: true })
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({
@@ -48,6 +49,14 @@ export class Users extends CoreEntity {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty({
+    example: "header.payload.sign",
+    description: "The user's refresh token",
+  })
+  @Column({ select: false, nullable: true, default: null })
+  @IsString()
+  refreshToken?: string;
 
   /**
    * hashing the password with bcrypt

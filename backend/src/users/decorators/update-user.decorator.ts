@@ -1,4 +1,5 @@
 import {
+  ApiBadRequestResponse,
   ApiConflictResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -9,12 +10,14 @@ import {
 import {
   UserApiConflictResponse,
   UserApiOkResponse,
+  UserBadRequestResponse,
   UserNotFoundResponse,
   UserUnprocessableEntity,
 } from "../swaggers/user.swagger";
 import {
+  USER_BAD_REQUEST_RESPONSE,
   USER_CONFLICT_RESPONSE,
-  USER_NOT_FOUND,
+  USER_NOT_FOUND_RESPONSE,
   USER_OK_RESPONSE,
   USER_UNPROCESSABLE_ENTITY,
 } from "src/users/constants/user.constants";
@@ -36,13 +39,18 @@ export const CustomUserUpdate = (): MethodDecorator => {
     })(target, propertyKey, descriptor);
 
     ApiNotFoundResponse({
-      description: USER_NOT_FOUND,
+      description: USER_NOT_FOUND_RESPONSE,
       type: UserNotFoundResponse,
     })(target, propertyKey, descriptor);
 
     ApiUnprocessableEntityResponse({
       description: USER_UNPROCESSABLE_ENTITY,
       type: UserUnprocessableEntity,
+    })(target, propertyKey, descriptor);
+
+    ApiBadRequestResponse({
+      description: USER_BAD_REQUEST_RESPONSE,
+      type: UserBadRequestResponse,
     })(target, propertyKey, descriptor);
 
     ApiParam({ name: "id", description: "user's id" })(
