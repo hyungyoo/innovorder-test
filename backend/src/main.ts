@@ -12,8 +12,9 @@ import { VERSION_SWAGGER } from "./common/constants/core.constants";
  */
 async function bootstrap() {
   const logger = new Logger("ServerListening");
-  const dockerPort = 8080;
 
+  const port = +process.env.BACKEND_PORT || 3000;
+  const appPort = +process.env.APP_PORT || 8080;
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({}));
@@ -25,8 +26,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
 
-  await app.listen(3000, () => {
-    logger.verbose(`Api server domain : [http://localhost:${dockerPort}]`);
+  await app.listen(port, () => {
+    logger.verbose(`Api server domain : [http://localhost:${appPort}]`);
   });
 }
 bootstrap();

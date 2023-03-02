@@ -20,6 +20,8 @@ import { AuthModule } from "./auth/auth.module";
         POSTGRES_PASSWORD: joi.string().required(),
         POSTGRES_USERNAME: joi.string().required(),
         POSTGRES_DB: joi.string().required(),
+        APP_PORT: joi.string(),
+        BACKEND_PORT: joi.string(),
       }),
     }),
     TypeOrmModule.forRoot({
