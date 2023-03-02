@@ -34,7 +34,6 @@ export class UsersService {
       await this.usersRepository.save(
         this.usersRepository.create(createUserInput)
       );
-    console.log(createdUser);
     return {
       success: true,
       code: HttpStatus.CREATED,
@@ -68,7 +67,6 @@ export class UsersService {
       await this.usersRepository.save(
         this.usersRepository.create({ ...user, ...updateUserInput })
       );
-    console.log(updatedUser);
     return {
       success: true,
       code: HttpStatus.OK,
@@ -95,18 +93,6 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // async findAll() {
 //   return `This action returns all users`;
