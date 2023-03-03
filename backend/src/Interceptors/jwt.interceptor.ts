@@ -34,6 +34,9 @@ export class JwtHeaderInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse();
     const requestPath = request.route.path;
 
+    console.log(
+      "**************************jwtHeaderInterceptor************************"
+    );
     return next.handle().pipe(
       tap(() => {
         const [accessToken, refreshToken] = this.authService.getTokens();

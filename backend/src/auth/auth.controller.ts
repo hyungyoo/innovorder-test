@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   UseGuards,
@@ -16,7 +17,6 @@ import { LoginInput } from "./dtos/login.dto";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 
 @ApiTags("Auth")
-@UseInterceptors(JwtHeaderInterceptor)
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller(`api/v${process.env.API_VERSION}/auth`)
 export class AuthController {
@@ -30,6 +30,7 @@ export class AuthController {
    * 유저정보와 상태코드를 반환합니다.
    */
   @UseGuards(LocalGuard)
+  @UseInterceptors(JwtHeaderInterceptor)
   @Post("login")
   @ApiBody({ type: LoginInput })
   login(@AuthUser() user: UserWithoutPassword) {
@@ -39,7 +40,7 @@ export class AuthController {
   /**
    * Delete refresh token from DB
    */
-  @Get("logout")
+  @Delete("logout")
   logout() {
     return this.authService.logout();
   }
