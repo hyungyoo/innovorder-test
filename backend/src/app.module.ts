@@ -7,8 +7,6 @@ import { UsersModule } from "./users/users.module";
 import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
-import { APP_INTERCEPTOR } from "@nestjs/core";
-import { JwtHeaderInterceptor } from "./Interceptors/token.interceptor";
 
 @Module({
   imports: [
@@ -48,10 +46,7 @@ import { JwtHeaderInterceptor } from "./Interceptors/token.interceptor";
     AuthModule,
   ],
   controllers: [],
-  providers: [{
-    provide: APP_INTERCEPTOR,
-    useClass: JwtHeaderInterceptor,
-  },],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

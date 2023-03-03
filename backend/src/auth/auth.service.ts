@@ -1,9 +1,4 @@
-import {
-  HttpStatus,
-  Injectable,
-  SetMetadata,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";

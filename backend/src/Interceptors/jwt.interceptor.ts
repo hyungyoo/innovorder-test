@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
 } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
 import { Observable, tap } from "rxjs";
 import { AuthService } from "src/auth/auth.service";
 
@@ -16,32 +16,43 @@ import { AuthService } from "src/auth/auth.service";
  * sameSite: CSRF(Cross-Site Request Forgery) 공격을 방지하기 위해, 쿠키를 발급한 도메인과 같은 도메인에서만 요청을 보낼 수 있도록 합니다
  * 이렇게 보안성을 강화한 쿠키를 사용하면, 클라이언트와 서버 간의 통신이 안전하게 이루어질 수 있습니다.
  */
+
+/**
+ * 라우터에따라 응답에 접근토큰, refresh토큰을 헤더에 추가합니다.
+ * 유저생성에서는 아무것도 추가하지않습니다.
+ * 로그인시 두개의 토큰을 다 추가합니다.
+ * jwt를 이용하여 접근시 접근토큰만 반환합니다.
+ */
 @Injectable()
 export class JwtHeaderInterceptor implements NestInterceptor {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
+  ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    // route 경로에 따라서 구분지을수있음
-    console.log(request.route.path);
+    const requestPath = request.route.path;
 
     return next.handle().pipe(
       tap(() => {
-        // access_token은 Authorization 헤더에 담아서 보냅니다.
         const [accessToken, refreshToken] = this.authService.getTokens();
         if (accessToken) {
           response.setHeader("Authorization", `Bearer ${accessToken}`);
         }
-        // refresh_token은 쿠키에 담아서 보냅니다.
-        if (refreshToken) {
-          response.cookie("refresh_token", refreshToken, {
-            httpOnly: true, // HTTP 요청에서만 쿠키 접근 가능
-            secure: true, // HTTPS에서만 쿠키 전송 가능
-            sameSite: "none", // 다른 사이트에서도 요청이 가능하도록 설정
-          });
+        if (
+          requestPath ===
+          `/api/v${this.configService.get("API_VERSION")}/auth/login`
+        ) {
+          if (refreshToken) {
+            response.cookie("refresh_token", refreshToken, {
+              httpOnly: true,
+              secure: true,
+              sameSite: "none",
+            });
+          }
         }
       })
     );
-    return next.handle();
   }
 }

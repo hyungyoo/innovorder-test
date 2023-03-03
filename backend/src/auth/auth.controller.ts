@@ -13,8 +13,10 @@ import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.int
 import { AuthUser } from "./decorators/login.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
+import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 
 @ApiTags("Auth")
+@UseInterceptors(JwtHeaderInterceptor)
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller(`api/v${process.env.API_VERSION}/auth`)
 export class AuthController {
