@@ -1,0 +1,1 @@
+export const AUTH_UNAUTHORIZED = "유저를 찾을수 없습니다."

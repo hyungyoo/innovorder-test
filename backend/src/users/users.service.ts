@@ -9,6 +9,8 @@ import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "./entities/user.entity";
 import { Repository } from "typeorm";
+import { SALT_ROUNDS } from "src/common/constants/core.constants";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class UsersService {
@@ -25,7 +27,6 @@ export class UsersService {
   async createUser(
     createUserInput: CreateUserInput
   ): Promise<CreateUserOutput> {
-    console.log("*****************SERVICE*****************");
     const isEmailExists = await this.checkEmailExists(createUserInput.email);
     if (isEmailExists) {
       throw new ConflictException("That email already exists for a user");
@@ -52,7 +53,6 @@ export class UsersService {
     id: number,
     updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    console.log("*****************SERVICE*****************");
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException(`User with ${id} not found`);
