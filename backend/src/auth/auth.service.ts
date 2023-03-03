@@ -39,9 +39,13 @@ export class AuthService {
     return this.tokens;
   }
 
-  logout() {}
+  logout() {
+    this.tokens = ["logout", undefined];
+  }
 
-  refresh() {}
+  refresh() {
+    this.tokens = ["refresh", undefined];
+  }
 
   /**
    * 유저아이디를 페이로드에 넣고, env로부터 expiration 시간과 시크릿을 받아 접근토큰과 리프레시토큰을 발행

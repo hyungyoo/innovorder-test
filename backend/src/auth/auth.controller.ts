@@ -18,6 +18,7 @@ import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 
 @ApiTags("Auth")
 @UseInterceptors(UndefinedToNullInterceptor)
+@UseInterceptors(JwtHeaderInterceptor)
 @Controller(`api/v${process.env.API_VERSION}/auth`)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -30,7 +31,6 @@ export class AuthController {
    * 유저정보와 상태코드를 반환합니다.
    */
   @UseGuards(LocalGuard)
-  @UseInterceptors(JwtHeaderInterceptor)
   @Post("login")
   @ApiBody({ type: LoginInput })
   login(@AuthUser() user: UserWithoutPassword) {
