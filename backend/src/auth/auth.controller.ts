@@ -6,7 +6,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { VERSION_SWAGGER } from "src/common/constants/core.constants";
 import { AuthService } from "./auth.service";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { LocalGuard } from "./guards/local.guard";
@@ -14,10 +13,11 @@ import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.int
 import { AuthUser } from "./decorators/login.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
+import { JwtHeaderInterceptor } from "src/Interceptors/token.interceptor";
 
 @ApiTags("Auth")
 @UseInterceptors(UndefinedToNullInterceptor)
-@Controller(`api/v${VERSION_SWAGGER}/auth`)
+@Controller(`api/v${process.env.API_VERSION}/auth`)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -31,6 +31,7 @@ export class AuthController {
   @UseGuards(LocalGuard)
   @Post("login")
   @ApiBody({ type: LoginInput })
+  @UseInterceptors(JwtHeaderInterceptor)
   login(@AuthUser() user: UserWithoutPassword) {
     return this.authService.login(user);
   }

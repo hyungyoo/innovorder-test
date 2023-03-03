@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
@@ -26,6 +26,7 @@ export class AuthService {
     console.log(user);
     const [access, refresh] = await this.generateTokens(user.id);
     await this.updateHashedRefreshToken(user.id, refresh);
+    
     return {
       success: true,
       code: HttpStatus.OK,
@@ -36,7 +37,7 @@ export class AuthService {
   logout() {}
 
   refresh() {}
-  
+
   /**
    * 유저아이디를 페이로드에 넣고, env로부터 expiration 시간과 시크릿을 받아 접근토큰과 리프레시토큰을 발행
    * @param id 유저 아이디
@@ -92,7 +93,7 @@ export class AuthService {
         "updatedAt",
       ],
     });
-    if (!user) throw new UserWithoutPassword(AUTH_UNAUTHORIZED);
+    if (!user) throw new UnauthorizedException(AUTH_UNAUTHORIZED);
     const isMatch = await user.comparePassword(password);
     if (isMatch) {
       const { password, ...result } = user;

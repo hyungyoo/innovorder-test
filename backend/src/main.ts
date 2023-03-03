@@ -3,7 +3,6 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { HttpExceptionFilter } from "./http-exception.filter";
-import { VERSION_SWAGGER } from "./common/constants/core.constants";
 
 /**
  * validation pipe
@@ -21,7 +20,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle("Innovorder test")
     .setDescription("innovorder test with CRUD")
-    .setVersion(VERSION_SWAGGER)
+    .setVersion(process.env.API_VERSION)
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);

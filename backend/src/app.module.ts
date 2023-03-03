@@ -26,6 +26,7 @@ import { AuthModule } from "./auth/auth.module";
         JWT_REFRESH_SECRET: joi.string().required(),
         JWT_ACCESS_EXPIRATION_TIME: joi.string().required(),
         JWT_REFRESH_EXPIRATION_TIME: joi.string().required(),
+        API_VERSION: joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
