@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 import { AUTH_UNAUTHORIZED } from "./constants/auth.constant";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { LoginOutput } from "./dtos/login.dto";
 
 @Injectable()
 export class AuthService {
@@ -15,35 +16,61 @@ export class AuthService {
     private readonly configService: ConfigService
   ) {}
 
-  async generateTokens(id: number) {
-    const accessToken = await this.jwtService.signAsync(
-      { id },
-      {
-        expiresIn: this.configService.get("JWT_ACCESS_EXPIRATION_TIME"),
-        secret: this.configService.get("JWT_ACCESS_SECRET"),
-      }
-    );
-    const refreshToken = await this.jwtService.signAsync(
-      { id },
-      {
-        expiresIn: this.configService.get("JWT_REFRESH_EXPIRATION_TIME"),
-        secret: this.configService.get("JWT_REFRESH_SECRET"),
-      }
-    );
-    return [accessToken, refreshToken];
-  }
-
-  async updateHashedRefreshToken(id: number, refreshToken: string) {
-    const user = this.userRepository.create({ id, refreshToken });
-    const newUser = await this.userRepository.save(user);
-    console.log(newUser.refreshToken, " : is new user refresh token");
-  }
-
-  async login(user: UserWithoutPassword) {
+  /**
+   * 유저 id를 이용하여 접근토큰과 리프레쉬토큰을 발급한후, 리프레쉬토큰을 해쉬화하여
+   * 유저정보에 업데이트한다.
+   * @param user authUser 데코레이터로 부터 넘겨받은 유저정보
+   * @returns
+   */
+  async login(user: UserWithoutPassword): Promise<LoginOutput> {
     console.log(user);
-    const [accessToken, refreshToken] = await this.generateTokens(user.id);
-    await this.updateHashedRefreshToken(user.id, refreshToken);
-    console.log(refreshToken, " is user refresh token");
+    const [access, refresh] = await this.generateTokens(user.id);
+    await this.updateHashedRefreshToken(user.id, refresh);
+    return {
+      success: true,
+      code: HttpStatus.OK,
+      data: { user },
+    };
+  }
+
+  logout() {}
+
+  refresh() {}
+  
+  /**
+   * 유저아이디를 페이로드에 넣고, env로부터 expiration 시간과 시크릿을 받아 접근토큰과 리프레시토큰을 발행
+   * @param id 유저 아이디
+   * @returns 접근토큰과 리프레쉬토큰
+   */
+  async generateTokens(id: number) {
+    return Promise.all([
+      this.jwtService.signAsync(
+        { id },
+        {
+          expiresIn: this.configService.get("JWT_ACCESS_EXPIRATION_TIME"),
+          secret: this.configService.get("JWT_ACCESS_SECRET"),
+        }
+      ),
+      this.jwtService.signAsync(
+        { id },
+        {
+          expiresIn: this.configService.get("JWT_REFRESH_EXPIRATION_TIME"),
+          secret: this.configService.get("JWT_REFRESH_SECRET"),
+        }
+      ),
+    ]);
+  }
+
+  /**
+   * create를 하면, 유저 엔티티에있는 hashRefreshToken 메서드가 beforeUpdate 데코레이터에 의해서
+   * 호출됨. 파라미터로 받은 refreshToken을 해쉬화하여 저장함
+   * @param id 유저 id
+   * @param refreshToken 해쉬화 되어야할 유저의 리프레쉬토큰
+   * @returns
+   */
+  updateHashedRefreshToken(id: number, refreshToken: string) {
+    const user = this.userRepository.create({ id, refreshToken });
+    return this.userRepository.save(user);
   }
 
   /**
@@ -73,8 +100,4 @@ export class AuthService {
     }
     return null;
   }
-
-  logout() {}
-
-  refresh() {}
 }
