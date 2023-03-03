@@ -76,7 +76,7 @@ export class Users extends CoreEntity {
         console.log(this.password);
       }
     } catch (error) {
-      console.log(error);
+      error;
       throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
     }
   }
@@ -87,7 +87,6 @@ export class Users extends CoreEntity {
       if (this.refreshToken) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
-        console.log(this.refreshToken);
       }
     } catch (error) {
       console.log(error);

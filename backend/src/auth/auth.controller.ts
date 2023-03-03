@@ -13,7 +13,6 @@ import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.int
 import { AuthUser } from "./decorators/login.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
-import { JwtHeaderInterceptor } from "src/Interceptors/token.interceptor";
 
 @ApiTags("Auth")
 @UseInterceptors(UndefinedToNullInterceptor)
@@ -31,7 +30,6 @@ export class AuthController {
   @UseGuards(LocalGuard)
   @Post("login")
   @ApiBody({ type: LoginInput })
-  @UseInterceptors(JwtHeaderInterceptor)
   login(@AuthUser() user: UserWithoutPassword) {
     return this.authService.login(user);
   }

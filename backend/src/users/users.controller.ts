@@ -28,7 +28,6 @@ export class UsersController {
   createUser(
     @Body() createUserInput: CreateUserInput
   ): Promise<CreateUserOutput> {
-    console.log("*****************CONTROLLER*****************");
     return this.usersService.createUser(createUserInput);
   }
 
@@ -38,7 +37,6 @@ export class UsersController {
     @Param("id", ParseIntPipe) id: number,
     @Body() updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    console.log("*****************CONTROLLER*****************");
     return this.usersService.updateUser(id, updateUserInput);
   }
 }

@@ -1,4 +1,9 @@
-import { HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  HttpStatus,
+  Injectable,
+  SetMetadata,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
@@ -10,6 +15,8 @@ import { LoginOutput } from "./dtos/login.dto";
 
 @Injectable()
 export class AuthService {
+  private tokens: string[];
+
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
     private readonly jwtService: JwtService,
@@ -23,15 +30,18 @@ export class AuthService {
    * @returns
    */
   async login(user: UserWithoutPassword): Promise<LoginOutput> {
-    console.log(user);
     const [access, refresh] = await this.generateTokens(user.id);
     await this.updateHashedRefreshToken(user.id, refresh);
-    
+    this.tokens = [access, refresh];
     return {
       success: true,
       code: HttpStatus.OK,
       data: { user },
     };
+  }
+
+  getTokens(): string[] {
+    return this.tokens;
   }
 
   logout() {}

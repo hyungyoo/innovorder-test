@@ -1,4 +1,4 @@
-import { PickType } from "@nestjs/swagger";
+import { ApiHideProperty, PickType } from "@nestjs/swagger";
 import { CreateUserOutput } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
 

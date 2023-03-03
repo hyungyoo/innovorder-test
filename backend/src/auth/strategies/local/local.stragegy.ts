@@ -5,7 +5,7 @@ import { AuthService } from "src/auth/auth.service";
 import { AUTH_UNAUTHORIZED } from "src/auth/constants/auth.constant";
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class LocalStrategy extends PassportStrategy(Strategy, "local") {
   constructor(private authService: AuthService) {
     super({ usernameField: "email" });
   }
