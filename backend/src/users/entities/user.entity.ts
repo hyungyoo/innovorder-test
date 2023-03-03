@@ -88,6 +88,7 @@ export class Users extends CoreEntity {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
       }
+      console.log("i am called in hashRefreshToken");
     } catch (error) {
       console.log(error);
       throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);

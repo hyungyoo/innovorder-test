@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -11,14 +10,14 @@ import { AuthService } from "./auth.service";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { LocalGuard } from "./guards/local.guard";
 import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.interceptor";
-import { AuthUser } from "./decorators/login.decorator";
+import { AuthUser } from "./decorators/auth-user.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
+import { AccessTokenGuard } from "./guards/jwt.guard";
 
 @ApiTags("Auth")
 @UseInterceptors(UndefinedToNullInterceptor)
-@UseInterceptors(JwtHeaderInterceptor)
 @Controller(`api/v${process.env.API_VERSION}/auth`)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -31,6 +30,7 @@ export class AuthController {
    * 유저정보와 상태코드를 반환합니다.
    */
   @UseGuards(LocalGuard)
+  @UseInterceptors(JwtHeaderInterceptor)
   @Post("login")
   @ApiBody({ type: LoginInput })
   login(@AuthUser() user: UserWithoutPassword) {
@@ -40,15 +40,17 @@ export class AuthController {
   /**
    * Delete refresh token from DB
    */
+  @UseGuards(AccessTokenGuard)
   @Delete("logout")
-  logout() {
-    return this.authService.logout();
+  logout(@AuthUser() user: UserWithoutPassword) {
+    return this.authService.logout(user);
   }
 
   /**
    * Compare refresh token in DB
    */
   @Get("refresh")
+  @UseInterceptors(JwtHeaderInterceptor)
   refresh() {
     return this.authService.refresh();
   }

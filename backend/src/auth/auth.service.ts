@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
+import { HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
@@ -7,6 +7,8 @@ import { AUTH_UNAUTHORIZED } from "./constants/auth.constant";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
+import { LogoutOutput } from "./dtos/logout.dto";
+import { use } from "passport";
 
 @Injectable()
 export class AuthService {
@@ -39,8 +41,24 @@ export class AuthService {
     return this.tokens;
   }
 
-  logout() {
-    this.tokens = ["logout", undefined];
+  /**
+   * 로그아웃에서는 아무것도안줘도된다
+   * access token을 안주는것만으로 사라지는지확인
+   * 서버에서 한반 안끼워서 보내면 사라지는건지
+   * 아니면 Authorization을 비위서보내야하는건지 확인하기
+   * @param user
+   */
+  async logout({ id }: UserWithoutPassword): Promise<LogoutOutput> {
+    const savedUser = await this.userRepository.save(
+      this.userRepository.create({ id, refreshToken: null })
+    );
+    if (!savedUser) {
+      throw new InternalServerErrorException("데이터를 저장하는데 실패하였습니다");
+    }
+    return {
+      success: true,
+      code: HttpStatus.NO_CONTENT,
+    };
   }
 
   refresh() {
