@@ -24,6 +24,7 @@ export class UserWithoutPassword extends OmitType(Users, [
   "refreshToken",
   "hashPassword",
   "comparePassword",
+  "hashRefreshToken",
 ]) {}
 
 /**

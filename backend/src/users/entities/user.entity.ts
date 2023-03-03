@@ -81,6 +81,20 @@ export class Users extends CoreEntity {
     }
   }
 
+  @BeforeUpdate()
+  async hashRefreshToken(): Promise<void> {
+    try {
+      if (this.refreshToken) {
+        const salt = await bcrypt.genSalt(SALT_ROUNDS);
+        this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
+        console.log(this.refreshToken);
+      }
+    } catch (error) {
+      console.log(error);
+      throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
+    }
+  }
+
   async comparePassword(password: string) {
     if (!this.password) throw new Error("password is not set");
     return bcrypt.compare(password, this.password);

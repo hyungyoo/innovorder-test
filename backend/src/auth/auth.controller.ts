@@ -24,8 +24,7 @@ export class AuthController {
   @UseGuards(LocalGuard)
   @Post("login")
   login(@AuthUser() user: UserWithoutPassword) {
-    console.log(user);
-    return this.authService.login();
+    return this.authService.login(user);
   }
 
   /**
