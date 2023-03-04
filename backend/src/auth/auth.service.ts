@@ -1,4 +1,10 @@
-import { HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
@@ -8,7 +14,9 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
 import { LogoutOutput } from "./dtos/logout.dto";
-import { use } from "passport";
+import { SALT_ROUNDS } from "src/common/constants/core.constants";
+import * as bcrypt from "bcryptjs";
+import { RefreshInput, RefreshOutput } from "./dtos/refresh.dto";
 
 @Injectable()
 export class AuthService {
@@ -53,7 +61,9 @@ export class AuthService {
       this.userRepository.create({ id, refreshToken: null })
     );
     if (!savedUser) {
-      throw new InternalServerErrorException("데이터를 저장하는데 실패하였습니다");
+      throw new InternalServerErrorException(
+        "데이터를 저장하는데 실패하였습니다"
+      );
     }
     return {
       success: true,
@@ -61,8 +71,13 @@ export class AuthService {
     };
   }
 
-  refresh() {
-    this.tokens = ["refresh", undefined];
+  async refresh({ id, refreshToken }: RefreshInput): Promise<RefreshOutput> {
+    const [access] = await this.generateTokens(id);
+    this.tokens = [access, refreshToken];
+    return {
+      success: true,
+      code: HttpStatus.OK,
+    };
   }
 
   /**

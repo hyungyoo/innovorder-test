@@ -6,7 +6,7 @@ import {
 import { PassportStrategy } from "@nestjs/passport";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { PayloadType } from "src/auth/interfaces/logout.interface";
+import { PayloadType } from "src/auth/interfaces/payload.interface";
 import { USER_NOT_FOUND_RESPONSE } from "src/users/constants/user.constants";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
@@ -22,7 +22,7 @@ import { Repository } from "typeorm";
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(
   Strategy,
-  "accessToken"
+  "jwt-access"
 ) {
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>

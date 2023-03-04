@@ -25,7 +25,7 @@ export class Users extends CoreEntity {
     description: "The user's first name",
     required: true,
   })
-  @Column()
+  @Column({ name: "first_name" })
   @IsString()
   @IsNotEmpty()
   firstName: string;
@@ -35,7 +35,7 @@ export class Users extends CoreEntity {
     description: "The user's last name",
     required: true,
   })
-  @Column()
+  @Column({ name: "last_name" })
   @IsString()
   @IsNotEmpty()
   lastName: string;
@@ -54,7 +54,12 @@ export class Users extends CoreEntity {
     example: "header.payload.sign",
     description: "The user's refresh token",
   })
-  @Column({ select: false, nullable: true, default: null })
+  @Column({
+    select: false,
+    nullable: true,
+    default: null,
+    name: "refresh_token",
+  })
   @IsString()
   refreshToken?: string;
 
@@ -81,14 +86,17 @@ export class Users extends CoreEntity {
     }
   }
 
+  /**
+   * 엔티티가 생성되고 업데이트되는순간 리프레쉬토큰을 해쉬화하여저장
+   */
   @BeforeUpdate()
   async hashRefreshToken(): Promise<void> {
     try {
       if (this.refreshToken) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
+        console.log("i am called in hashRefreshToken");
       }
-      console.log("i am called in hashRefreshToken");
     } catch (error) {
       console.log(error);
       throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);

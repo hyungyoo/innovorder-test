@@ -25,28 +25,22 @@ import { AuthService } from "src/auth/auth.service";
  */
 @Injectable()
 export class JwtHeaderInterceptor implements NestInterceptor {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService
-  ) {}
+  constructor(private readonly authService: AuthService) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    const requestPath = request.route.path;
+    const requestPath = request.route.path.replace(/\/api\/v\d+\.\d+\//, "");
 
-    console.log(
-      "**************************jwtHeaderInterceptor************************"
-    );
+    // console.log(
+    //   "**************************jwtHeaderInterceptor************************"
+    // );
     return next.handle().pipe(
       tap(() => {
         const [accessToken, refreshToken] = this.authService.getTokens();
         if (accessToken) {
           response.setHeader("Authorization", `Bearer ${accessToken}`);
         }
-        if (
-          requestPath ===
-          `/api/v${this.configService.get("API_VERSION")}/auth/login`
-        ) {
+        if (requestPath === "auth/login" || requestPath === "auth/refresh") {
           if (refreshToken) {
             response.cookie("refresh_token", refreshToken, {
               httpOnly: true,

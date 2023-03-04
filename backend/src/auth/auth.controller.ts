@@ -1,6 +1,5 @@
 import {
   Controller,
-  Delete,
   Get,
   Post,
   UseGuards,
@@ -14,7 +13,8 @@ import { AuthUser } from "./decorators/auth-user.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
-import { AccessTokenGuard } from "./guards/jwt.guard";
+import { AccessTokenGuard, RefreshTokenGuard } from "./guards/jwt.guard";
+import { RefreshInput } from "./dtos/refresh.dto";
 
 @ApiTags("Auth")
 @UseInterceptors(UndefinedToNullInterceptor)
@@ -41,7 +41,7 @@ export class AuthController {
    * Delete refresh token from DB
    */
   @UseGuards(AccessTokenGuard)
-  @Delete("logout")
+  @Get("logout")
   logout(@AuthUser() user: UserWithoutPassword) {
     return this.authService.logout(user);
   }
@@ -49,9 +49,10 @@ export class AuthController {
   /**
    * Compare refresh token in DB
    */
-  @Get("refresh")
+  @UseGuards(RefreshTokenGuard)
   @UseInterceptors(JwtHeaderInterceptor)
-  refresh() {
-    return this.authService.refresh();
+  @Get("refresh")
+  refresh(@AuthUser() user: RefreshInput) {
+    return this.authService.refresh(user);
   }
 }
