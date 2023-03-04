@@ -1,17 +1,17 @@
-.PHONY: all
-all :
-	docker-compose up --build
+.PHONY: dev
+dev :
+	docker-compose --env-file .env.dev up --build
 
 .PHONY: fclean
 fclean :
-	docker-compose down
+	docker-compose --env-file .env.dev down
 	docker container prune --force 
 	docker image prune --force --all
 	docker network prune --force 
 	docker volume prune --force 
 
 .PHONY: re
-re : fclean all
+re : fclean dev
 
 .PHONY: frontend
 frontend :

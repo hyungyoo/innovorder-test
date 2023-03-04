@@ -7,8 +7,6 @@ import { UsersModule } from "./users/users.module";
 import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
-import { APP_FILTER } from "@nestjs/core";
-import { HttpExceptionFilter } from "./http-exception.filter";
 
 @Module({
   imports: [
@@ -22,6 +20,13 @@ import { HttpExceptionFilter } from "./http-exception.filter";
         POSTGRES_PASSWORD: joi.string().required(),
         POSTGRES_USERNAME: joi.string().required(),
         POSTGRES_DB: joi.string().required(),
+        APP_PORT: joi.string(),
+        BACKEND_PORT: joi.string(),
+        JWT_ACCESS_SECRET: joi.string().required(),
+        JWT_REFRESH_SECRET: joi.string().required(),
+        JWT_ACCESS_EXPIRATION_TIME: joi.string().required(),
+        JWT_REFRESH_EXPIRATION_TIME: joi.string().required(),
+        API_VERSION: joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({

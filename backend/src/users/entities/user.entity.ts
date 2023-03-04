@@ -17,6 +17,7 @@ export class Users extends CoreEntity {
   })
   @Column({ unique: true })
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({
@@ -24,7 +25,7 @@ export class Users extends CoreEntity {
     description: "The user's first name",
     required: true,
   })
-  @Column()
+  @Column({ name: "first_name" })
   @IsString()
   @IsNotEmpty()
   firstName: string;
@@ -34,7 +35,7 @@ export class Users extends CoreEntity {
     description: "The user's last name",
     required: true,
   })
-  @Column()
+  @Column({ name: "last_name" })
   @IsString()
   @IsNotEmpty()
   lastName: string;
@@ -48,6 +49,19 @@ export class Users extends CoreEntity {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty({
+    example: "header.payload.sign",
+    description: "The user's refresh token",
+  })
+  @Column({
+    select: false,
+    nullable: true,
+    default: null,
+    name: "refresh_token",
+  })
+  @IsString()
+  refreshToken?: string;
 
   /**
    * hashing the password with bcrypt
@@ -64,10 +78,33 @@ export class Users extends CoreEntity {
       if (this.password) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.password = await bcrypt.hash(this.password, salt);
+        console.log(this.password);
+      }
+    } catch (error) {
+      error;
+      throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
+    }
+  }
+
+  /**
+   * 엔티티가 생성되고 업데이트되는순간 리프레쉬토큰을 해쉬화하여저장
+   */
+  @BeforeUpdate()
+  async hashRefreshToken(): Promise<void> {
+    try {
+      if (this.refreshToken) {
+        const salt = await bcrypt.genSalt(SALT_ROUNDS);
+        this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
+        console.log("i am called in hashRefreshToken");
       }
     } catch (error) {
       console.log(error);
       throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
     }
+  }
+
+  async comparePassword(password: string) {
+    if (!this.password) throw new Error("password is not set");
+    return bcrypt.compare(password, this.password);
   }
 }

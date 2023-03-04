@@ -11,7 +11,6 @@ import { UsersService } from "./users.service";
 import { CreateUserInput, CreateUserOutput } from "./dtos/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
-import { VERSION_SWAGGER } from "src/common/constants/core.constants";
 import { CustomUserCreate } from "src/users/decorators/create-user.decorators";
 import { CustomUserUpdate } from "src/users/decorators/update-user.decorator";
 import { Users } from "./entities/user.entity";
@@ -20,7 +19,7 @@ import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.int
 @ApiExtraModels(Users)
 @ApiTags("Users")
 @UseInterceptors(UndefinedToNullInterceptor)
-@Controller(`api/v${VERSION_SWAGGER}/users`)
+@Controller(`api/v${process.env.API_VERSION}/users`)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -29,7 +28,6 @@ export class UsersController {
   createUser(
     @Body() createUserInput: CreateUserInput
   ): Promise<CreateUserOutput> {
-    console.log("*****************CONTROLLER*****************");
     return this.usersService.createUser(createUserInput);
   }
 
@@ -39,7 +37,6 @@ export class UsersController {
     @Param("id", ParseIntPipe) id: number,
     @Body() updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    console.log("*****************CONTROLLER*****************");
     return this.usersService.updateUser(id, updateUserInput);
   }
 }
