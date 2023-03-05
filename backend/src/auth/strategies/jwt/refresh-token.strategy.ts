@@ -11,9 +11,10 @@ import { RefreshInput } from "src/auth/dtos/refresh.dto";
 
 function refreshJwtFromReq(request: Request) {
   if (request && request.headers && request.headers["cookie"])
-    return request.headers["cookie"][0]?.split(";")[0]?.split("=")[1];
-
-  console.log(request.headers.cookie, " is a cookie");
+    return request.headers["cookie"]
+      ?.split(";")
+      ?.find((cookie) => cookie.startsWith("refresh_token="))
+      ?.split("=")[1];
   return null;
 }
 
