@@ -7,6 +7,8 @@ import { UsersModule } from "./users/users.module";
 import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
+import { APP_INTERCEPTOR } from "@nestjs/core";
+import { JwtHeaderInterceptor } from "./Interceptors/jwt.interceptor";
 
 @Module({
   imports: [

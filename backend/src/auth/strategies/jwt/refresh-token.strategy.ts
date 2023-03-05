@@ -10,8 +10,10 @@ import * as bcrypt from "bcryptjs";
 import { RefreshInput } from "src/auth/dtos/refresh.dto";
 
 function refreshJwtFromReq(request: Request) {
-  if (request && request.headers && request.headers["set-cookie"])
-    return request.headers["set-cookie"][0]?.split(";")[0]?.split("=")[1];
+  if (request && request.headers && request.headers["cookie"])
+    return request.headers["cookie"][0]?.split(";")[0]?.split("=")[1];
+
+  console.log(request.headers.cookie, " is a cookie");
   return null;
 }
 

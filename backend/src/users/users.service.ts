@@ -9,8 +9,6 @@ import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "./entities/user.entity";
 import { Repository } from "typeorm";
-import { SALT_ROUNDS } from "src/common/constants/core.constants";
-import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class UsersService {

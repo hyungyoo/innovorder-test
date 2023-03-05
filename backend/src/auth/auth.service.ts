@@ -3,7 +3,6 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
-  UnprocessableEntityException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
@@ -14,8 +13,6 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
 import { LogoutOutput } from "./dtos/logout.dto";
-import { SALT_ROUNDS } from "src/common/constants/core.constants";
-import * as bcrypt from "bcryptjs";
 import { RefreshInput, RefreshOutput } from "./dtos/refresh.dto";
 
 @Injectable()
