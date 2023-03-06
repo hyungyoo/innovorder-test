@@ -9,11 +9,14 @@ import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "./entities/user.entity";
 import { Repository } from "typeorm";
+import { AuthService } from "src/auth/auth.service";
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(Users) private readonly usersRepository: Repository<Users>
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
+    private readonly authService: AuthService
   ) {}
 
   /**
@@ -65,6 +68,8 @@ export class UsersService {
       await this.usersRepository.save(
         this.usersRepository.create({ ...user, ...updateUserInput })
       );
+    const [access] = await this.authService.generateTokens(id);
+    this.authService.tokens = [access, undefined];
     return {
       success: true,
       code: HttpStatus.OK,

@@ -17,7 +17,7 @@ import { RefreshInput, RefreshOutput } from "./dtos/refresh.dto";
 
 @Injectable()
 export class AuthService {
-  private tokens: string[] | undefined;
+  private _tokens: [string, string];
 
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
@@ -34,7 +34,7 @@ export class AuthService {
   async login(user: UserWithoutPassword): Promise<LoginOutput> {
     const [access, refresh] = await this.generateTokens(user.id);
     await this.updateHashedRefreshToken(user.id, refresh);
-    this.tokens = [access, refresh];
+    this._tokens = [access, refresh];
     return {
       success: true,
       code: HttpStatus.OK,
@@ -42,15 +42,9 @@ export class AuthService {
     };
   }
 
-  getTokens(): string[] {
-    return this.tokens;
-  }
-
   /**
    * 로그아웃에서는 아무것도안줘도된다
-   * access token을 안주는것만으로 사라지는지확인
-   * 서버에서 한반 안끼워서 보내면 사라지는건지
-   * 아니면 Authorization을 비위서보내야하는건지 확인하기
+   * 접근토큰은 남아있기때문에, redis의 블랙리스트에등록.
    * @param user
    */
   async logout({ id }: UserWithoutPassword): Promise<LogoutOutput> {
@@ -68,13 +62,34 @@ export class AuthService {
     };
   }
 
+  /**
+   * 유저로 부터 받은 리프레쉬토큰으로 유저정보를 파악, 해쉬화된 유저의 리프레쉬토큰과 비교후
+   * 정보가 맞다면, 유저에게 기존 리프레쉬토큰과 새로운 접근토큰을 발급.
+   * @param id 유저 아이디 @param refreshToken 유저 리프레쉬토큰
+   * @returns success: true, 상태코드 : ok, 헤더의 authorization에 새로운 토큰값
+   */
   async refresh({ id, refreshToken }: RefreshInput): Promise<RefreshOutput> {
     const [access] = await this.generateTokens(id);
-    this.tokens = [access, refreshToken];
+    this._tokens = [access, refreshToken];
     return {
       success: true,
       code: HttpStatus.OK,
     };
+  }
+
+  /**
+   * setter
+   */
+  public set tokens(value: [string, string]) {
+    this._tokens = value;
+  }
+
+  /**
+   * getter
+   */
+  public get tokens(): [string, string] {
+    if (!this._tokens) return [undefined, undefined];
+    return this._tokens;
   }
 
   /**

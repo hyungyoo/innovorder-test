@@ -35,7 +35,7 @@ export class JwtHeaderInterceptor implements NestInterceptor {
     // );
     return next.handle().pipe(
       tap(() => {
-        const [accessToken, refreshToken] = this.authService.getTokens();
+        const [accessToken, refreshToken] = this.authService.tokens;
         if (accessToken) {
           response.setHeader("Authorization", `Bearer ${accessToken}`);
         }

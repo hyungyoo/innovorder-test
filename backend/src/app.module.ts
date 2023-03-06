@@ -8,7 +8,9 @@ import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
 import { APP_INTERCEPTOR } from "@nestjs/core";
-import { JwtHeaderInterceptor } from "./Interceptors/jwt.interceptor";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
+import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.interceptor";
 
 @Module({
   imports: [
@@ -39,16 +41,22 @@ import { JwtHeaderInterceptor } from "./Interceptors/jwt.interceptor";
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: process.env.ENV !== "prod",
-      // logging: process.env.NODE_ENV === "dev",
       logging: false,
       entities: [Users],
       keepConnectionAlive: true,
     }),
     UsersModule,
     AuthModule,
+    PassportModule,
+    JwtModule.register({}),
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: UndefinedToNullInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

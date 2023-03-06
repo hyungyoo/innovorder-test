@@ -16,6 +16,9 @@ export class UndefinedToNullInterceptor implements NestInterceptor {
     _: ExecutionContext,
     next: CallHandler<any>
   ): Observable<any> | Promise<Observable<any>> {
+    console.log(
+      "*************************undefindToNull****************************"
+    );
     return next.handle().pipe(
       map((data) => {
         return data === undefined ? null : data;
