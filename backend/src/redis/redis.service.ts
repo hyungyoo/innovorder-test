@@ -18,10 +18,11 @@ export class RedisService {
   ) {}
 
   /**
-   * 접근토큰을 인자로받아 블랙리스트에 있는지 체크
-   * 또한 접근토큰을 새로발급하기때문에 기존 접근토큰은 블랙리스트에등록
-   * 레디스에 저장되는시간은 토큰을통해 계산
-   * unix epoch로 현재시간 exp가 넘어갔는지
+   * 접근토큰을 인자로받아 블랙리스트에 있는지 체크함.
+   * 또한 접근토큰을 새로발급하기때문에 기존 접근토큰은 블랙리스트에등록함.
+   * 레디스에 저장되는시간은 토큰을통해 계산 (getRemainingSecondsForTokenExpiry)
+   * blackListClient의 saad로 셋 자료구조로 저장(중복되는키 중복저장방지)
+   * expireat으로 ttl지정
    * @param accessToken 체크해야할 접근토큰
    */
   async addToBlacklist(accessToken: string) {
