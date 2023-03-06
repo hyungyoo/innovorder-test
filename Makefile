@@ -1,10 +1,12 @@
+ENV_FILE=--env-file .env.dev
+
 .PHONY: dev
 dev :
-	docker-compose --env-file .env.dev up --build
+	docker-compose ${ENV_FILE} up --build
 
 .PHONY: fclean
 fclean :
-	docker-compose --env-file .env.dev down
+	docker-compose ${ENV_FILE} down
 	docker container prune --force 
 	docker image prune --force --all
 	docker network prune --force 

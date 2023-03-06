@@ -30,16 +30,22 @@ export class JwtHeaderInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse();
     const requestPath = request.route.path.replace(/\/api\/v\d+\.\d+\//, "");
 
-    // console.log(
-    //   "**************************jwtHeaderInterceptor************************"
-    // );
+    console.log(
+      "**************************jwtHeaderInterceptor************************"
+    );
     return next.handle().pipe(
       tap(() => {
         const [accessToken, refreshToken] = this.authService.tokens;
         if (accessToken) {
+          console.log(
+            "***********success to generate new access token******************"
+          );
           response.setHeader("Authorization", `Bearer ${accessToken}`);
         }
         if (requestPath === "auth/login" || requestPath === "auth/refresh") {
+          console.log(
+            "***********success to generate new refresh token******************"
+          );
           if (refreshToken) {
             response.cookie("refresh_token", refreshToken, {
               httpOnly: true,

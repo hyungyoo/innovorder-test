@@ -11,6 +11,8 @@ import { APP_INTERCEPTOR } from "@nestjs/core";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.interceptor";
+import { RedisModule } from "nestjs-redis";
+import { Redis } from "ioredis";
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.inter
         JWT_ACCESS_EXPIRATION_TIME: joi.string().required(),
         JWT_REFRESH_EXPIRATION_TIME: joi.string().required(),
         API_VERSION: joi.string().required(),
+        REDIS_HOST: joi.string().required(),
+        REDIS_PORT: joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -47,8 +51,6 @@ import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.inter
     }),
     UsersModule,
     AuthModule,
-    PassportModule,
-    JwtModule.register({}),
   ],
   controllers: [],
   providers: [

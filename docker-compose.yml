@@ -15,9 +15,10 @@ services:
       APP_PORT: int
       BACKEND_PORT: int
     networks:
-      - user_network
+      - innovorder_network
     depends_on:
       - postgres
+      - redis
 
   postgres:
     image: postgres
@@ -27,13 +28,22 @@ services:
       - 5432:5432
     env_file: .env.dev
     networks:
-      - user_network
+      - innovorder_network
     volumes:
       - postgres_db:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - innovorder_network
 
 volumes:
   postgres_db:
 
 networks:
-  user_network:
+  innovorder_network:
     driver: bridge
