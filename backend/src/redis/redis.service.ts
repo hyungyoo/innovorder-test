@@ -38,34 +38,15 @@ export class RedisService {
       }
       const remainingSeconds =
         this.getRemainingSecondsForTokenExpiry(accessToken);
-      await this.saveToRedisKeyValue(
-        accessToken,
-        ACCESS_TOKEN_VALUE,
-        remainingSeconds
-      );
-    } catch (error) {
-      throw new UnauthorizedException(error.message);
-    }
-  }
-
-  /**
-   * 키, value를 받아, key-value 자료구조형태로 ttl을 설정하고 정해진시간만큼 저장후 삭제
-   * blacklist와 food api등 key-value의 자료구조에 공통으로 사용될수있음
-   * @param key 저장할 키값
-   * @param value 저장할 value값, food api가 아닐때에는 null로두어 검색속도를 빠르게한다
-   * @param ttl key와 value가 redis에 저장되는 시간
-   */
-  async saveToRedisKeyValue(key: string, value: string, ttl: number) {
-    try {
-      if (ttl > 0) {
-        await this.blackListClient.set(key, value);
+      if (remainingSeconds > 0) {
+        await this.blackListClient.set(accessToken, ACCESS_TOKEN_VALUE);
         await this.blackListClient.expireat(
-          key,
-          Math.floor(Date.now() / 1000) + ttl
+          accessToken,
+          Math.floor(Date.now() / 1000) + remainingSeconds
         );
       }
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new UnauthorizedException(error.message);
     }
   }
 
