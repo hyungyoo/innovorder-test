@@ -12,7 +12,7 @@ import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.inter
 import { RedisModule } from "./redis/redis.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
-import { FoodModule } from './food/food.module';
+import { FoodModule } from "./food/food.module";
 
 @Module({
   imports: [
@@ -35,6 +35,10 @@ import { FoodModule } from './food/food.module';
         API_VERSION: joi.string().required(),
         REDIS_HOST: joi.string().required(),
         REDIS_PORT: joi.string().required(),
+        HTTP_TIMEOUT: joi.string(),
+        HTTP_MAX_REDIRECTS: joi.string(),
+        FOOD_API_URL: joi.string().required(),
+        FOOD_API_EXTENSION: joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({

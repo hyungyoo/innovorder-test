@@ -9,6 +9,6 @@ export class FoodController {
 
   @Get(":barcode")
   food(@Param("barcode") barcode: number) {
-    console.log(barcode);
+    return this.foodService.findFood(barcode);
   }
 }
