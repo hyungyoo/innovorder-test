@@ -24,4 +24,8 @@ JWT_REFRESH_EXPIRATION_TIME=
 ## Redis
 
 1. 보안을 위한 access token들의 black list
+   - set 이용
 2. look aside cache - food API (파레토의 법칙)
+   - key value 이용
+
+데이터하나에 두개의 인스턴스를 사용

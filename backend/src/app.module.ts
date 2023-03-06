@@ -49,6 +49,8 @@ import { Redis } from "ioredis";
       entities: [Users],
       keepConnectionAlive: true,
     }),
+    PassportModule.register({}),
+    JwtModule.register({}),
     UsersModule,
     AuthModule,
   ],
