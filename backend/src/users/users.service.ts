@@ -68,8 +68,7 @@ export class UsersService {
       await this.usersRepository.save(
         this.usersRepository.create({ ...user, ...updateUserInput })
       );
-    const [access] = await this.authService.generateTokens(id);
-    this.authService.tokens = [access, undefined];
+    await this.generateNewAccessToken(id);
     return {
       success: true,
       code: HttpStatus.OK,
@@ -94,6 +93,15 @@ export class UsersService {
    */
   findUserById(id: number) {
     return this.usersRepository.findOne({ where: { id } });
+  }
+
+  /**
+   * 유저의 id를 받아, 새로운 접근토큰을 발급하여 클라이언트의 헤더에 추가.
+   * @param id 유저 id
+   */
+  async generateNewAccessToken(id: number) {
+    const [access] = await this.authService.generateTokens(id);
+    this.authService.tokens = [access, undefined];
   }
 }
 
