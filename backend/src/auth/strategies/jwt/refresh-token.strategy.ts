@@ -46,22 +46,22 @@ export class RefreshTokenStrategy extends PassportStrategy(
    * @returns user정보를 요청에추가
    */
   async validate(req: Request, { id }: PayloadType) {
-    const tokenFromHeader = refreshJwtFromReq(req);
+    const refreshtokenFromHeader = refreshJwtFromReq(req);
     const user: RefreshInput = await this.userRepository.findOne({
       where: { id },
       select: ["id", "refreshToken"],
     });
-    if (!(tokenFromHeader && user.refreshToken))
+    if (!(refreshtokenFromHeader && user.refreshToken))
       throw new UnauthorizedException(
         "다시 로그인을 해주세요. 로그아웃을하였던가 토큰이없어"
       );
     const isMatchRefreshToken = await bcrypt.compareSync(
-      tokenFromHeader,
+      refreshtokenFromHeader,
       user.refreshToken || null
     );
     if (!isMatchRefreshToken)
       throw new UnauthorizedException("토큰이 달라서 권한없음");
-    user.refreshToken = tokenFromHeader;
+    user.refreshToken = refreshtokenFromHeader;
     return user;
   }
 }
