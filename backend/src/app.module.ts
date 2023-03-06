@@ -10,7 +10,6 @@ import { AuthModule } from "./auth/auth.module";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.interceptor";
 import { RedisModule } from "./redis/redis.module";
-import { Redis } from "ioredis";
 
 @Module({
   imports: [
