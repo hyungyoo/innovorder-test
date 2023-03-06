@@ -26,13 +26,13 @@ export class AccessTokenGuard extends AuthGuard("jwt-access") {
     console.log(
       "******************** AccessToken check black list **********************************"
     );
+    const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(
+      context.switchToHttp().getRequest()
+    );
     /**
      * 블랙이면 바로 false
      * 아니면 블랙에 추가하고 넘기기 true
      */
-    const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(
-      context.switchToHttp().getRequest()
-    );
     return super.canActivate(context);
   }
 }

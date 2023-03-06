@@ -155,4 +155,14 @@ export class AuthService {
     }
     return null;
   }
+
+  /**
+   * 유저의 id를 받아, 새로운 접근토큰을 만을 발급하여 클라이언트의 헤더에 추가.
+   * jwt에서의 페이로드로 로그인을 한 후에, 해당 id로 새로운 접근토큰을 생성
+   * @param id 유저 id
+   */
+  async generateNewAccessToken(id: number) {
+    const [access] = await this.generateTokens(id);
+    this.tokens = [access, undefined];
+  }
 }
