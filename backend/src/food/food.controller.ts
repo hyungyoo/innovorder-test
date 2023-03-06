@@ -1,12 +1,14 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Param } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { FoodService } from "./food.service";
 
-@ApiTags("food")
+@ApiTags("Food")
 @Controller(`api/v${process.env.API_VERSION}/food`)
 export class FoodController {
   constructor(private readonly foodService: FoodService) {}
 
   @Get(":barcode")
-  food() {}
+  food(@Param("barcode") barcode: number) {
+    console.log(barcode);
+  }
 }

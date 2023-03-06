@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Redis } from "ioredis";
+import { ACCESS_TOKEN_VALUE } from "./constants/redis.constants";
 
 @Injectable()
 export class RedisService {
@@ -29,23 +30,35 @@ export class RedisService {
     try {
       console.log("******** in add to black list *******************");
       const isBlacklisted = await this.isTokenBlacklisted(accessToken);
-      if (isBlacklisted) {
+      console.log(isBlacklisted);
+      if (isBlacklisted === ACCESS_TOKEN_VALUE) {
         throw new UnauthorizedException(
           "The access token is blacklisted. Access is denied."
         );
       }
       const remainingSeconds =
         this.getRemainingSecondsForTokenExpiry(accessToken);
-      if (remainingSeconds > 0) {
-        // await this.blackListClient.sadd(accessToken, 1, "EX", remainingSeconds);
-        await this.blackListClient.sadd(accessToken, 1);
+      await this.saveToRedisKeyValue(
+        accessToken,
+        ACCESS_TOKEN_VALUE,
+        remainingSeconds
+      );
+    } catch (error) {
+      throw new UnauthorizedException(error.message);
+    }
+  }
+
+  async saveToRedisKeyValue(key: string, value: string, ttl: number) {
+    try {
+      if (ttl > 0) {
+        await this.blackListClient.set(key, value);
         await this.blackListClient.expireat(
-          accessToken,
-          Math.floor(Date.now() / 1000) + remainingSeconds
+          key,
+          Math.floor(Date.now() / 1000) + ttl
         );
       }
     } catch (error) {
-      throw new UnauthorizedException(error.message);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -74,7 +87,7 @@ export class RedisService {
    */
   async isTokenBlacklisted(accessToken: string) {
     try {
-      return await this.blackListClient.sismember(accessToken, 1);
+      return await this.blackListClient.get(accessToken);
     } catch (error) {
       throw new InternalServerErrorException(
         "Failed to find token in the blacklist."

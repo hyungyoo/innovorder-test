@@ -4,7 +4,6 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
 import {
@@ -53,14 +52,9 @@ export const CustomUserUpdate = (): MethodDecorator => {
       type: UserBadRequestResponse,
     })(target, propertyKey, descriptor);
 
-    ApiParam({ name: "id", description: "user's id" })(
-      target,
-      propertyKey,
-      descriptor
-    );
-
     ApiOperation({
-      summary: "Update user information using user ID",
+      summary:
+        "Update user information using user ID from access token 다시번역!",
       description:
         "Find the user corresponding to the user ID and update the user",
     })(target, propertyKey, descriptor);
