@@ -37,6 +37,7 @@ export class RedisService {
         this.getRemainingSecondsForTokenExpiry(accessToken);
       if (remainingSeconds > 0) {
         await this.blackListClient.sadd(accessToken, 1, "EX", remainingSeconds);
+        // await this.blackListClient.expireat(accessToken, remainingSeconds);
       }
     } catch (error) {
       throw new UnauthorizedException(error.message);
