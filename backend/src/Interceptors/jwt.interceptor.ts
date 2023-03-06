@@ -4,7 +4,6 @@ import {
   ExecutionContext,
   CallHandler,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Observable, tap } from "rxjs";
 import { AuthService } from "src/auth/auth.service";
 

@@ -17,7 +17,7 @@ import { RefreshInput, RefreshOutput } from "./dtos/refresh.dto";
 
 @Injectable()
 export class AuthService {
-  private tokens: string[];
+  private tokens: string[] | undefined;
 
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
@@ -82,7 +82,7 @@ export class AuthService {
    * @param id 유저 아이디
    * @returns 접근토큰과 리프레쉬토큰
    */
-  async generateTokens(id: number) {
+  generateTokens(id: number) {
     return Promise.all([
       this.jwtService.signAsync(
         { id },
