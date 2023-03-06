@@ -12,6 +12,7 @@ import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.inter
 import { RedisModule } from "./redis/redis.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
+import { FoodModule } from './food/food.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { JwtModule } from "@nestjs/jwt";
     UsersModule,
     AuthModule,
     RedisModule,
+    FoodModule,
   ],
   controllers: [],
   providers: [
