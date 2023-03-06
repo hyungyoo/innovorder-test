@@ -9,7 +9,7 @@ import { RefreshTokenStrategy } from "./strategies/jwt/refresh-token.strategy";
 import { AccessTokenStrategy } from "./strategies/jwt/access-token.strategy";
 import { RedisService } from "src/redis/redis.service";
 
-@Global()
+// @Global()
 @Module({
   imports: [TypeOrmModule.forFeature([Users])],
   controllers: [AuthController],

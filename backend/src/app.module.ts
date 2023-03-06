@@ -10,6 +10,8 @@ import { AuthModule } from "./auth/auth.module";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.interceptor";
 import { RedisModule } from "./redis/redis.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -46,6 +48,8 @@ import { RedisModule } from "./redis/redis.module";
       entities: [Users],
       keepConnectionAlive: true,
     }),
+    PassportModule.register({}),
+    JwtModule.register({}),
     UsersModule,
     AuthModule,
     RedisModule,
