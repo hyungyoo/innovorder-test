@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { LocalStrategy } from "./strategies/local/local.stragegy";
@@ -8,6 +8,7 @@ import { JwtService } from "@nestjs/jwt";
 import { RefreshTokenStrategy } from "./strategies/jwt/refresh-token.strategy";
 import { AccessTokenStrategy } from "./strategies/jwt/access-token.strategy";
 
+@Global()
 @Module({
   imports: [TypeOrmModule.forFeature([Users])],
   controllers: [AuthController],

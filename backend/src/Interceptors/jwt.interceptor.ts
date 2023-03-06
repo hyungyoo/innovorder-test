@@ -3,7 +3,9 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Inject,
 } from "@nestjs/common";
+import { Redis } from "ioredis";
 import { Observable, tap } from "rxjs";
 import { AuthService } from "src/auth/auth.service";
 
@@ -24,7 +26,10 @@ import { AuthService } from "src/auth/auth.service";
  */
 @Injectable()
 export class JwtHeaderInterceptor implements NestInterceptor {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    @Inject("REDIS_BLACKLIST_INSTANCE") private readonly backlistClient: Redis
+  ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();

@@ -8,10 +8,8 @@ import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
 import { APP_INTERCEPTOR } from "@nestjs/core";
-import { PassportModule } from "@nestjs/passport";
-import { JwtModule } from "@nestjs/jwt";
 import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.interceptor";
-import { RedisModule } from "nestjs-redis";
+import { RedisModule } from "./redis/redis.module";
 import { Redis } from "ioredis";
 
 @Module({
@@ -49,10 +47,9 @@ import { Redis } from "ioredis";
       entities: [Users],
       keepConnectionAlive: true,
     }),
-    PassportModule.register({}),
-    JwtModule.register({}),
     UsersModule,
     AuthModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [
