@@ -26,7 +26,7 @@ async function bootstrap() {
   SwaggerModule.setup("api", app, document);
 
   await app.listen(port, () => {
-    logger.verbose(`Api server domain : [http://localhost:${appPort}]`);
+    logger.verbose(`Api Server : [http://localhost:${appPort}]`);
   });
 }
 bootstrap();

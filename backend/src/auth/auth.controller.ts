@@ -8,7 +8,6 @@ import {
 import { AuthService } from "./auth.service";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { LocalGuard } from "./guards/local.guard";
-import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.interceptor";
 import { AuthUser } from "./decorators/auth-user.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
@@ -17,7 +16,6 @@ import { AccessTokenGuard, RefreshTokenGuard } from "./guards/jwt.guard";
 import { RefreshInput } from "./dtos/refresh.dto";
 
 @ApiTags("Auth")
-@UseInterceptors(UndefinedToNullInterceptor)
 @Controller(`api/v${process.env.API_VERSION}/auth`)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

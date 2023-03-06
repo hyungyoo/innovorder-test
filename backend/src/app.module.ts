@@ -8,7 +8,10 @@ import * as path from "path";
 import { Users } from "./users/entities/user.entity";
 import { AuthModule } from "./auth/auth.module";
 import { APP_INTERCEPTOR } from "@nestjs/core";
-import { JwtHeaderInterceptor } from "./Interceptors/jwt.interceptor";
+import { UndefinedToNullInterceptor } from "./Interceptors/undefinedToNull.interceptor";
+import { RedisModule } from "./redis/redis.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -29,6 +32,8 @@ import { JwtHeaderInterceptor } from "./Interceptors/jwt.interceptor";
         JWT_ACCESS_EXPIRATION_TIME: joi.string().required(),
         JWT_REFRESH_EXPIRATION_TIME: joi.string().required(),
         API_VERSION: joi.string().required(),
+        REDIS_HOST: joi.string().required(),
+        REDIS_PORT: joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -39,16 +44,23 @@ import { JwtHeaderInterceptor } from "./Interceptors/jwt.interceptor";
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: process.env.ENV !== "prod",
-      // logging: process.env.NODE_ENV === "dev",
       logging: false,
       entities: [Users],
       keepConnectionAlive: true,
     }),
+    PassportModule.register({}),
+    JwtModule.register({}),
     UsersModule,
     AuthModule,
+    RedisModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: UndefinedToNullInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

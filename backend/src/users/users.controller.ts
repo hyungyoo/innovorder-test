@@ -17,14 +17,12 @@ import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
 import { CustomUserCreate } from "src/users/decorators/create-user.decorators";
 import { CustomUserUpdate } from "src/users/decorators/update-user.decorator";
 import { Users } from "./entities/user.entity";
-import { UndefinedToNullInterceptor } from "src/Interceptors/undefinedToNull.interceptor";
 import { AccessTokenGuard } from "src/auth/guards/jwt.guard";
 import { AuthUser } from "src/auth/decorators/auth-user.decorator";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 
 @ApiExtraModels(Users)
 @ApiTags("Users")
-@UseInterceptors(UndefinedToNullInterceptor)
 @Controller(`api/v${process.env.API_VERSION}/users`)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

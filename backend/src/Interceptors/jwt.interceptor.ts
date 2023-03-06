@@ -3,8 +3,9 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Inject,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Redis } from "ioredis";
 import { Observable, tap } from "rxjs";
 import { AuthService } from "src/auth/auth.service";
 
@@ -25,22 +26,31 @@ import { AuthService } from "src/auth/auth.service";
  */
 @Injectable()
 export class JwtHeaderInterceptor implements NestInterceptor {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    @Inject("REDIS_BLACKLIST_INSTANCE") private readonly backlistClient: Redis
+  ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
     const requestPath = request.route.path.replace(/\/api\/v\d+\.\d+\//, "");
 
-    // console.log(
-    //   "**************************jwtHeaderInterceptor************************"
-    // );
+    console.log(
+      "**************************jwtHeaderInterceptor************************"
+    );
     return next.handle().pipe(
       tap(() => {
-        const [accessToken, refreshToken] = this.authService.getTokens();
+        const [accessToken, refreshToken] = this.authService.tokens;
         if (accessToken) {
+          console.log(
+            "***********success to generate new access token******************"
+          );
           response.setHeader("Authorization", `Bearer ${accessToken}`);
         }
         if (requestPath === "auth/login" || requestPath === "auth/refresh") {
+          console.log(
+            "***********success to generate new refresh token******************"
+          );
           if (refreshToken) {
             response.cookie("refresh_token", refreshToken, {
               httpOnly: true,
