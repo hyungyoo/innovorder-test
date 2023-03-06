@@ -32,14 +32,18 @@ export class AuthService {
    * @returns
    */
   async login(user: UserWithoutPassword): Promise<LoginOutput> {
-    const [access, refresh] = await this.generateTokens(user.id);
-    await this.updateHashedRefreshToken(user.id, refresh);
-    this._tokens = [access, refresh];
-    return {
-      success: true,
-      code: HttpStatus.OK,
-      data: { user },
-    };
+    try {
+      const [access, refresh] = await this.generateTokens(user.id);
+      await this.updateHashedRefreshToken(user.id, refresh);
+      this._tokens = [access, refresh];
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        data: { user },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   /**
@@ -48,18 +52,22 @@ export class AuthService {
    * @param user
    */
   async logout({ id }: UserWithoutPassword): Promise<LogoutOutput> {
-    const savedUser = await this.userRepository.save(
-      this.userRepository.create({ id, refreshToken: null })
-    );
-    if (!savedUser) {
-      throw new InternalServerErrorException(
-        "데이터를 저장하는데 실패하였습니다"
+    try {
+      const savedUser = await this.userRepository.save(
+        this.userRepository.create({ id, refreshToken: null })
       );
+      if (!savedUser) {
+        throw new InternalServerErrorException(
+          "데이터를 저장하는데 실패하였습니다"
+        );
+      }
+      return {
+        success: true,
+        code: HttpStatus.NO_CONTENT,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-    return {
-      success: true,
-      code: HttpStatus.NO_CONTENT,
-    };
   }
 
   /**
@@ -69,12 +77,16 @@ export class AuthService {
    * @returns success: true, 상태코드 : ok, 헤더의 authorization에 새로운 토큰값
    */
   async refresh({ id, refreshToken }: RefreshInput): Promise<RefreshOutput> {
-    const [access] = await this.generateTokens(id);
-    this._tokens = [access, refreshToken];
-    return {
-      success: true,
-      code: HttpStatus.OK,
-    };
+    try {
+      const [access] = await this.generateTokens(id);
+      this._tokens = [access, refreshToken];
+      return {
+        success: true,
+        code: HttpStatus.OK,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   /**
@@ -98,22 +110,26 @@ export class AuthService {
    * @returns 접근토큰과 리프레쉬토큰
    */
   generateTokens(id: number) {
-    return Promise.all([
-      this.jwtService.signAsync(
-        { id },
-        {
-          expiresIn: this.configService.get("JWT_ACCESS_EXPIRATION_TIME"),
-          secret: this.configService.get("JWT_ACCESS_SECRET"),
-        }
-      ),
-      this.jwtService.signAsync(
-        { id },
-        {
-          expiresIn: this.configService.get("JWT_REFRESH_EXPIRATION_TIME"),
-          secret: this.configService.get("JWT_REFRESH_SECRET"),
-        }
-      ),
-    ]);
+    try {
+      return Promise.all([
+        this.jwtService.signAsync(
+          { id },
+          {
+            expiresIn: this.configService.get("JWT_ACCESS_EXPIRATION_TIME"),
+            secret: this.configService.get("JWT_ACCESS_SECRET"),
+          }
+        ),
+        this.jwtService.signAsync(
+          { id },
+          {
+            expiresIn: this.configService.get("JWT_REFRESH_EXPIRATION_TIME"),
+            secret: this.configService.get("JWT_REFRESH_SECRET"),
+          }
+        ),
+      ]);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   /**
@@ -124,8 +140,12 @@ export class AuthService {
    * @returns
    */
   updateHashedRefreshToken(id: number, refreshToken: string) {
-    const user = this.userRepository.create({ id, refreshToken });
-    return this.userRepository.save(user);
+    try {
+      const user = this.userRepository.create({ id, refreshToken });
+      return this.userRepository.save(user);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   /**
@@ -135,25 +155,29 @@ export class AuthService {
    * @returns 유저정보 또는 Null값
    */
   async validateUser(email: string, password: string) {
-    const user = await this.userRepository.findOne({
-      where: { email },
-      select: [
-        "id",
-        "email",
-        "password",
-        "firstName",
-        "lastName",
-        "createdAt",
-        "updatedAt",
-      ],
-    });
-    if (!user) throw new UnauthorizedException(AUTH_UNAUTHORIZED);
-    const isMatch = await user.comparePassword(password);
-    if (isMatch) {
-      const { password, ...result } = user;
-      return result;
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email },
+        select: [
+          "id",
+          "email",
+          "password",
+          "firstName",
+          "lastName",
+          "createdAt",
+          "updatedAt",
+        ],
+      });
+      if (!user) throw new UnauthorizedException(AUTH_UNAUTHORIZED);
+      const isMatch = await user.comparePassword(password);
+      if (isMatch) {
+        const { password, ...result } = user;
+        return result;
+      }
+      return null;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-    return null;
   }
 
   /**
@@ -162,7 +186,11 @@ export class AuthService {
    * @param id 유저 id
    */
   async generateNewAccessToken(id: number) {
-    const [access] = await this.generateTokens(id);
-    this.tokens = [access, undefined];
+    try {
+      const [access] = await this.generateTokens(id);
+      this.tokens = [access, undefined];
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }

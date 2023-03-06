@@ -1,7 +1,7 @@
 import { Global, Module } from "@nestjs/common";
 import { Redis } from "ioredis";
 import { RedisService } from "./redis.service";
-import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 
 /**
  * 보통은 작은 프로젝트에서는 하나의 호스트에서 두 개의 인스턴스를 구성하여
@@ -35,7 +35,7 @@ import { ConfigService } from "@nestjs/config";
       },
     },
     RedisService,
-    ConfigService,
+    JwtService,
   ],
   exports: ["REDIS_BLACKLIST_INSTANCE", "REDIS_CACHE_INSTANCE", RedisService],
 })

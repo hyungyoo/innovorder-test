@@ -2,6 +2,7 @@ import {
   ConflictException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
 import { CreateUserInput, CreateUserOutput } from "./dtos/create-user.dto";
@@ -28,19 +29,23 @@ export class UsersService {
   async createUser(
     createUserInput: CreateUserInput
   ): Promise<CreateUserOutput> {
-    const isEmailExists = await this.checkEmailExists(createUserInput.email);
-    if (isEmailExists) {
-      throw new ConflictException("That email already exists for a user");
+    try {
+      const isEmailExists = await this.checkEmailExists(createUserInput.email);
+      if (isEmailExists) {
+        throw new ConflictException("That email already exists for a user");
+      }
+      const { password, refreshToken, ...createdUser } =
+        await this.usersRepository.save(
+          this.usersRepository.create(createUserInput)
+        );
+      return {
+        success: true,
+        code: HttpStatus.CREATED,
+        data: { user: createdUser },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-    const { password, refreshToken, ...createdUser } =
-      await this.usersRepository.save(
-        this.usersRepository.create(createUserInput)
-      );
-    return {
-      success: true,
-      code: HttpStatus.CREATED,
-      data: { user: createdUser },
-    };
   }
 
   /**
@@ -54,26 +59,32 @@ export class UsersService {
     id: number,
     updateUserInput: UpdateUserInput
   ): Promise<UpdateUserOutput> {
-    const user = await this.findUserById(id);
-    if (!user) {
-      throw new NotFoundException(`User with ${id} not found`);
-    }
-    if (updateUserInput.email) {
-      const isEmailExists = await this.checkEmailExists(updateUserInput.email);
-      if (isEmailExists && user.email === updateUserInput.email) {
-        throw new ConflictException("That email already exists for a user");
+    try {
+      const user = await this.findUserById(id);
+      if (!user) {
+        throw new NotFoundException(`User with ${id} not found`);
       }
+      if (updateUserInput.email) {
+        const isEmailExists = await this.checkEmailExists(
+          updateUserInput.email
+        );
+        if (isEmailExists && user.email === updateUserInput.email) {
+          throw new ConflictException("That email already exists for a user");
+        }
+      }
+      const { password, refreshToken, ...updatedUser } =
+        await this.usersRepository.save(
+          this.usersRepository.create({ ...user, ...updateUserInput })
+        );
+      await this.authService.generateNewAccessToken(id);
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        data: { user: updatedUser },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-    const { password, refreshToken, ...updatedUser } =
-      await this.usersRepository.save(
-        this.usersRepository.create({ ...user, ...updateUserInput })
-      );
-    await this.authService.generateNewAccessToken(id);
-    return {
-      success: true,
-      code: HttpStatus.OK,
-      data: { user: updatedUser },
-    };
   }
 
   /**
@@ -82,8 +93,12 @@ export class UsersService {
    * @returns boolean indicating whether the email exists or not
    */
   async checkEmailExists(email: string): Promise<boolean> {
-    const user = await this.usersRepository.findOne({ where: { email } });
-    return !!user;
+    try {
+      const user = await this.usersRepository.findOne({ where: { email } });
+      return !!user;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   /**
@@ -92,7 +107,11 @@ export class UsersService {
    * @returns Users or null
    */
   findUserById(id: number) {
-    return this.usersRepository.findOne({ where: { id } });
+    try {
+      return this.usersRepository.findOne({ where: { id } });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }
 
