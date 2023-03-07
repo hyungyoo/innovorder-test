@@ -26,10 +26,7 @@ import { AuthService } from "src/auth/auth.service";
  */
 @Injectable()
 export class JwtHeaderInterceptor implements NestInterceptor {
-  constructor(
-    private readonly authService: AuthService,
-    @Inject("REDIS_BLACKLIST_INSTANCE") private readonly backlistClient: Redis
-  ) {}
+  constructor(private readonly authService: AuthService) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();

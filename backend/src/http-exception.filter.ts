@@ -4,9 +4,11 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Injectable,
 } from "@nestjs/common";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { HttpExceptionOutput } from "./common/dtos/http-exception.output.dto";
+import { AuthService } from "./auth/auth.service";
 
 /**
  * ExceptionFilter class that catches HttpExceptions
@@ -23,6 +25,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   ): Response<HttpExceptionOutput> {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
+    const reqeust = context.getRequest<Request>();
     const status = exception.getStatus();
     const error = exception.getResponse() as
       | { message: any; statusCode: number }

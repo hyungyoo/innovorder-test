@@ -21,48 +21,59 @@ export class FoodService {
   ) {}
 
   /**
-   * 바코드를 파라미터로 받아, 바코드를 키로서 레디스 데이터베이스에 검색후
-   * 캐쉬데이터가 남아있다면, 캐쉬를 반환.
-   * 아니라면 open food facts에 api요청을하여, 결과값을 데이터베이스에 저장한후
-   * 결과값 반환
-   * @param barcode 상품바코드
+   * Retrieve data from Open Food Facts API using a barcode while logged in.
+   * 1. Receive a barcode as a parameter and search the Redis database using the barcode as the key.
+   * 2. If cached data is available, return the cached data.
+   * 3. If not, make an API request to Open Food Facts.
+   * 4. Store the result in the Redis database.
+   * 5. Return the result.
+   * @param barcode barcode
    * @returns success (boolean), code (number), data or error
    */
   async findFoodByBarcode(barcode: string): Promise<FoodOutput> {
     try {
       const isCachedData = await this.redisService.getCachedFoodData(barcode);
-      if (isCachedData) {
-        if (isCachedData.product) {
-          console.log("in cache data");
-          return {
-            success: true,
-            code: isCachedData.status,
-            data: { product: isCachedData.product },
-          };
-        } else {
-          console.log("in cache data");
-          throw new NotFoundException(isCachedData.status_verbose);
-        }
-      }
+      if (isCachedData) return this.getReturnValue(isCachedData);
+
       const openFoodApiOutput: OpenFoodApiOutput =
         await this.getFoodDataFromApi(barcode);
-      if (openFoodApiOutput?.product) {
-        console.log("in new data");
-        await this.redisService.addToCacheFoodData(barcode, openFoodApiOutput);
+      await this.redisService.addToCacheFoodData(barcode, openFoodApiOutput);
+      return this.getReturnValue(openFoodApiOutput);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  /**
+   * Define and return the values that the findFoodByBarcode method should return based on the resources received from the API.
+   * @param data OpenFoodApiOut
+   * @returns
+   */
+  async getReturnValue(data: OpenFoodApiOutput) {
+    try {
+      if (data.product) {
         return {
           success: true,
-          code: openFoodApiOutput.status,
-          data: { product: openFoodApiOutput.product },
+          code: HttpStatus.OK,
+          data: { product: data.product },
         };
       } else {
-        console.log("in new data");
-        throw new NotFoundException(openFoodApiOutput.status_verbose);
+        return {
+          success: false,
+          code: HttpStatus.NOT_FOUND,
+          error: { message: data.status_verbose },
+        };
       }
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
+  /**
+   * Return data from open food facts API using barcode
+   * @param barcode barcode
+   * @returns data from food data api
+   */
   async getFoodDataFromApi(barcode: string): Promise<OpenFoodApiOutput> {
     try {
       const url = this.configService.get("FOOD_API_URL");

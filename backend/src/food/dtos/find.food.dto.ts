@@ -1,12 +1,9 @@
 import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsObject } from "class-validator";
+import { IsNumber, IsObject, IsString } from "class-validator";
 import { CoreOutput } from "src/common/dtos/core-output.dto";
 import { Product } from "./food.dto";
 
-/**
- * 음식결과값을 위한 dto
- */
 export class FoodOutput extends CoreOutput {
   @ApiProperty({
     example: HttpStatus.OK,
@@ -18,8 +15,18 @@ export class FoodOutput extends CoreOutput {
 
   @ApiProperty({
     description: "food data",
-    required: true,
+    required: false,
   })
   @IsObject()
-  data: { product: Product };
+  data?: { product: Product };
+
+  @ApiProperty({
+    example: { message: "Error message" },
+    description: "Error message from http execption filter",
+    required: false,
+  })
+  @IsString({ each: true })
+  error?: {
+    message: string | string[];
+  };
 }
