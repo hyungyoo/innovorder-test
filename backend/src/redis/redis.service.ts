@@ -106,14 +106,13 @@ export class RedisService {
       const ttlFormEnv = +this.configService.get("CACHE_TTL");
       const ttl = ttlFormEnv && ttlFormEnv > 0 ? ttlFormEnv : 600;
       const serializedData = JSON.stringify(openFoodApiOutput);
-      console.log(serializedData);
-      const result = await this.cacheClient.hset(barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
+      await this.cacheClient.hset(barcode, barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
       await this.cacheClient.expireat(
         barcode,
         Math.floor(Date.now() / 1000) + ttl
       );
     } catch (error) {
-      new InternalServerErrorException(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -124,10 +123,10 @@ export class RedisService {
    */
   async getCachedFoodData(barcode: string) {
     try {
-      // console.log(await this.cacheClient.hgetall(barcode));
-      return this.cacheClient.hgetall(barcode);
+      const serializedData = await this.cacheClient.hget(barcode, barcode);
+      return JSON.parse(serializedData);
     } catch (error) {
-      new InternalServerErrorException(error);
+      throw new InternalServerErrorException(error);
     }
   }
 }
