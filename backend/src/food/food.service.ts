@@ -1,14 +1,15 @@
 import { HttpService } from "@nestjs/axios";
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { AxiosError } from "axios";
-import { catchError, firstValueFrom } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { RedisService } from "src/redis/redis.service";
-import { OpenFoodFactsDto } from "./dtos/food.dto";
+import { OpenFoodApiOutput } from "./dtos/food.dto";
 import { FoodOutput } from "./dtos/find.food.dto";
 
 @Injectable()
@@ -20,47 +21,56 @@ export class FoodService {
   ) {}
 
   /**
-   *
+   * 바코드를 파라미터로 받아, 바코드를 키로서 레디스 데이터베이스에 검색후
+   * 캐쉬데이터가 남아있다면, 캐쉬를 반환.
+   * 아니라면 open food facts에 api요청을하여, 결과값을 데이터베이스에 저장한후
+   * 결과값 반환
    * @param barcode 상품바코드
    * @returns success (boolean), code (number), data or error
    */
-  async findFoodByBarcode(barcode: number): Promise<FoodOutput> {
+  async findFoodByBarcode(barcode: string): Promise<FoodOutput> {
     try {
-      // 바코드조회후 있으면 바로 반환
-      //  getCachedFoodData => data반환? 바로 리턴
-
-      const {
-        status: code,
-        data: { product, status_verbose },
-      }: OpenFoodFactsDto = await this.getFoodDataFromApi(barcode);
-      // 또는 레디스에서 가져오기
-
-      // 이 product에 뭘 추가해야 레디스에서 가져온게아닌것같지?
-      if (product) {
-        // 캐쉬에 저장
+      const isCachedData = await this.redisService.getCachedFoodData(barcode);
+      if (isCachedData) {
+        if (isCachedData.product) {
+          console.log("in cache data");
+          return {
+            success: true,
+            code: isCachedData.status,
+            data: { product: isCachedData.product },
+          };
+        } else {
+          console.log("in cache data");
+          throw new NotFoundException(isCachedData.status_verbose);
+        }
+      }
+      const openFoodApiOutput: OpenFoodApiOutput =
+        await this.getFoodDataFromApi(barcode);
+      if (openFoodApiOutput?.product) {
+        console.log("in new data");
+        await this.redisService.addToCacheFoodData(barcode, openFoodApiOutput);
         return {
           success: true,
-          code,
-          data: { product: product },
+          code: openFoodApiOutput.status,
+          data: { product: openFoodApiOutput.product },
         };
+      } else {
+        console.log("in new data");
+        throw new NotFoundException(openFoodApiOutput.status_verbose);
       }
-      throw new NotFoundException(status_verbose);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  async getFoodDataFromApi(barcode: number): Promise<OpenFoodFactsDto> {
+  async getFoodDataFromApi(barcode: string): Promise<OpenFoodApiOutput> {
     try {
       const url = this.configService.get("FOOD_API_URL");
       const extention = this.configService.get("FOOD_API_EXTENTSION");
-      return firstValueFrom(
-        this.httpService.get(`${url}/${barcode}/${extention}`).pipe(
-          catchError((error: AxiosError) => {
-            throw new NotFoundException(error);
-          })
-        )
-      );
+      const openFoodFactsDto: OpenFoodApiOutput = await firstValueFrom(
+        this.httpService.get(`${url}/${barcode}/${extention}`).pipe()
+      ).then((res) => res.data);
+      return openFoodFactsDto;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

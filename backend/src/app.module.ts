@@ -45,6 +45,7 @@ import { FoodModule } from "./food/food.module";
         HTTP_MAX_REDIRECTS: joi.string(),
         FOOD_API_URL: joi.string().required(),
         FOOD_API_EXTENSION: joi.string().required(),
+        CACHE_TTL: joi.string(),
       }),
     }),
     TypeOrmModule.forRoot({
