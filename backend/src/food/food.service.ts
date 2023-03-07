@@ -32,7 +32,10 @@ export class FoodService {
       const {
         status: code,
         data: { product, status_verbose },
-      }: OpenFoodFactsDto = await this.getFoodData(barcode);
+      }: OpenFoodFactsDto = await this.getFoodDataFromApi(barcode);
+      // 또는 레디스에서 가져오기
+
+      // 이 product에 뭘 추가해야 레디스에서 가져온게아닌것같지?
       if (product) {
         // 캐쉬에 저장
         return {
@@ -47,7 +50,7 @@ export class FoodService {
     }
   }
 
-  async getFoodData(barcode: number): Promise<OpenFoodFactsDto> {
+  async getFoodDataFromApi(barcode: number): Promise<OpenFoodFactsDto> {
     try {
       const url = this.configService.get("FOOD_API_URL");
       const extention = this.configService.get("FOOD_API_EXTENTSION");
