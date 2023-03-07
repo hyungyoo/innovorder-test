@@ -3,9 +3,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Inject,
 } from "@nestjs/common";
-import { Redis } from "ioredis";
 import { Observable, map } from "rxjs";
 import { AuthService } from "src/auth/auth.service";
 
@@ -19,10 +17,10 @@ import { AuthService } from "src/auth/auth.service";
  */
 
 /**
- * 라우터에따라 응답에 접근토큰, refresh토큰을 헤더에 추가합니다.
- * 유저생성에서는 아무것도 추가하지않습니다.
- * 로그인시 두개의 토큰을 다 추가합니다.
- * jwt를 이용하여 접근시 접근토큰만 반환합니다.
+ * Depending on the router, access tokens and refresh tokens are added to the headers of the response.
+ * Nothing is added for user creation.
+ * Both tokens are added to header for login.
+ * When using JWT for access, only the access token is added to header.
  */
 @Injectable()
 export class JwtHeaderInterceptor implements NestInterceptor {
@@ -39,15 +37,9 @@ export class JwtHeaderInterceptor implements NestInterceptor {
             ? this.authService.tokens
             : await this.authService.generateTokens(request.user.id);
         if (accessToken) {
-          console.log(
-            "***********success to generate new access token******************"
-          );
           await response.setHeader("Authorization", `Bearer ${accessToken}`);
         }
         if (endpointApi === "auth/login" || endpointApi === "auth/refresh") {
-          console.log(
-            "***********success to generate new refresh token******************"
-          );
           if (refreshToken) {
             await response.cookie("refresh_token", refreshToken, {
               httpOnly: true,

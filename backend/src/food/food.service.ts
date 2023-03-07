@@ -1,10 +1,8 @@
 import { HttpService } from "@nestjs/axios";
 import {
-  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
