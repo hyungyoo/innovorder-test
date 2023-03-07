@@ -19,6 +19,6 @@ export class FoodController {
   // @UseInterceptors(JwtHeaderInterceptor)
   @Get(":barcode")
   food(@Param("barcode") barcode: number) {
-    return this.foodService.findFoodByBarcode(barcode);
+    return this.foodService.findFoodByBarcode(barcode.toString());
   }
 }

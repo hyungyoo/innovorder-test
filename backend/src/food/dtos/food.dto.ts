@@ -6,11 +6,11 @@ export interface OpenFoodFactsDto {
   };
 }
 
-export interface Root {
-  code: string;
+export interface OpenFoodApiOutput {
   product: Product;
-  status: number;
   status_verbose: string;
+  code: string;
+  status: number;
 }
 
 export interface Product {
