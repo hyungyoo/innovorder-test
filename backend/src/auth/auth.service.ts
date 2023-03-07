@@ -13,7 +13,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
 import { LogoutOutput } from "./dtos/logout.dto";
-import { RefreshInput, RefreshOutput } from "./dtos/refresh.dto";
+import { RefreshOutput } from "./dtos/refresh.dto";
 
 @Injectable()
 export class AuthService {
@@ -76,17 +76,11 @@ export class AuthService {
    * @param id 유저 아이디 @param refreshToken 유저 리프레쉬토큰
    * @returns success: true, 상태코드 : ok, 헤더의 authorization에 새로운 토큰값
    */
-  async refresh({ id, refreshToken }: RefreshInput): Promise<RefreshOutput> {
-    try {
-      const [access] = await this.generateTokens(id);
-      this._tokens = [access, refreshToken];
-      return {
-        success: true,
-        code: HttpStatus.OK,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+  async refresh(): Promise<RefreshOutput> {
+    return {
+      success: true,
+      code: HttpStatus.OK,
+    };
   }
 
   /**

@@ -15,8 +15,8 @@ import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 export class FoodController {
   constructor(private readonly foodService: FoodService) {}
 
-  // @UseGuards(AccessTokenGuard)
-  // @UseInterceptors(JwtHeaderInterceptor)
+  @UseGuards(AccessTokenGuard)
+  @UseInterceptors(JwtHeaderInterceptor)
   @Get(":barcode")
   food(@Param("barcode") barcode: number) {
     return this.foodService.findFoodByBarcode(barcode.toString());

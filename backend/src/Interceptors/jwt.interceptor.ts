@@ -6,7 +6,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import { Redis } from "ioredis";
-import { Observable, tap } from "rxjs";
+import { Observable, map } from "rxjs";
 import { AuthService } from "src/auth/auth.service";
 
 /**
@@ -33,32 +33,33 @@ export class JwtHeaderInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    const requestPath = request.route.path.replace(/\/api\/v\d+\.\d+\//, "");
+    const endpointApi = request.route.path.replace(/\/api\/v\d+\.\d+\//, "");
 
-    console.log(
-      "**************************jwtHeaderInterceptor************************"
-    );
     return next.handle().pipe(
-      tap(() => {
-        const [accessToken, refreshToken] = this.authService.tokens;
+      map(async (responseData) => {
+        const [accessToken, refreshToken] =
+          endpointApi === "auth/login"
+            ? this.authService.tokens
+            : await this.authService.generateTokens(request.user.id);
         if (accessToken) {
           console.log(
             "***********success to generate new access token******************"
           );
-          response.setHeader("Authorization", `Bearer ${accessToken}`);
+          await response.setHeader("Authorization", `Bearer ${accessToken}`);
         }
-        if (requestPath === "auth/login" || requestPath === "auth/refresh") {
+        if (endpointApi === "auth/login" || endpointApi === "auth/refresh") {
           console.log(
             "***********success to generate new refresh token******************"
           );
           if (refreshToken) {
-            response.cookie("refresh_token", refreshToken, {
+            await response.cookie("refresh_token", refreshToken, {
               httpOnly: true,
               secure: true,
               sameSite: "none",
             });
           }
         }
+        return responseData;
       })
     );
   }

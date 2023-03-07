@@ -50,7 +50,7 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @UseInterceptors(JwtHeaderInterceptor)
   @Get("refresh")
-  refresh(@AuthUser() user: RefreshInput) {
-    return this.authService.refresh(user);
+  refresh() {
+    return this.authService.refresh();
   }
 }
