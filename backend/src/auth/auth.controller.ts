@@ -12,8 +12,8 @@ import { AuthUser } from "./decorators/auth-user.decorator";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { LoginInput } from "./dtos/login.dto";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
-import { AccessTokenGuard, RefreshTokenGuard } from "./guards/jwt.guard";
-import { RefreshInput } from "./dtos/refresh.dto";
+import { AccessTokenGuard } from "./guards/jwt-access.guard";
+import { RefreshTokenGuard } from "./guards/jwt-refresh.guard";
 
 @ApiTags("Auth")
 @Controller(`api/v${process.env.API_VERSION}/auth`)
@@ -21,11 +21,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
-   * http요청 바디로부터 들어온 loginInput에서의 이메일과 비밀번호를 이용하여
-   * localGuard에서 localStrategy를 통해 로그인성공후,
-   * login 서비스에서 접근토큰과 리프레쉬토큰을 생성
-   * 헤더에 접근토큰과 리프레쉬토큰을 추가하여,
-   * 유저정보와 상태코드를 반환합니다.
+   * User login using passport local, guards, and interceptors
+   * 1. Local passport using email and password through localGuard.
+   * 2. Pass the user received from AuthUser to the login service
+   * 3. Return the user information in the body section,
+   * as well as the refresh token and access token in the header section..
+   * @param user user
+   * @returns header (refresh token, access token), body (user)
    */
   @UseGuards(LocalGuard)
   @UseInterceptors(JwtHeaderInterceptor)
@@ -36,7 +38,12 @@ export class AuthController {
   }
 
   /**
-   * Delete refresh token from DB
+   * Delete the hashed refresh token of a user from the database
+   * 1. Get the user information using the access token guard and AuthUser decorator.
+   * 2. Delete the hashed refresh token of the user from the database.
+   * 3. Calculate the remaining time of the access token and register it in the blacklist Redis.
+   * @param user user
+   * @returns  success (boolean), code (number)
    */
   @UseGuards(AccessTokenGuard)
   @Get("logout")
@@ -45,7 +52,11 @@ export class AuthController {
   }
 
   /**
-   * Compare refresh token in DB
+   * Authenticate with the user's refresh token and issue a new access token.
+   * 1. Use the refresh token from guard.
+   * 2. Use the user's ID to re-issue an access token.
+   * 3. Before sending response, add refresh and access token to header in the interceptor.
+   * @returns header (refresh token, access token)
    */
   @UseGuards(RefreshTokenGuard)
   @UseInterceptors(JwtHeaderInterceptor)

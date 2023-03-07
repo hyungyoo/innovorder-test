@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -7,8 +6,12 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Redis } from "ioredis";
-import { ACCESS_TOKEN_VALUE } from "./constants/redis.constants";
-import { OpenFoodApiOutput, OpenFoodFactsDto } from "src/food/dtos/food.dto";
+import {
+  ACCESS_TOKEN_BLACKLISTED,
+  ACCESS_TOKEN_PAYLOAD_ERROR,
+  ACCESS_TOKEN_VALUE,
+} from "./interfaces/redis.constants";
+import { OpenFoodApiOutput } from "src/food/dtos/food.dto";
 import { ConfigService } from "@nestjs/config";
 
 @Injectable()
@@ -22,25 +25,23 @@ export class RedisService {
   ) {}
 
   /**
-   * 접근토큰을 인자로받아 블랙리스트에 있는지 체크함.
-   * 또한 접근토큰을 새로발급하기때문에 기존 접근토큰은 블랙리스트에등록함.
-   * 레디스에 저장되는시간은 토큰을통해 계산 (getRemainingSecondsForTokenExpiry)
-   * key value자료형으로 저장함.
-   * set은 중복을제거하지만, 중복에대해서는 크게 오류가발생하지않으며 value가 필요하지않음
-   * set처럼 여러개의 value가 필요하지않음
-   * expireat으로 ttl지정
-   * @param accessToken 체크해야할 접근토큰
+   *
+   * 1. Receives an access token as an argument and checks if it is on the blacklist.
+   * 2. After new access token is issued, the previous access token is registered on the blacklist.
+   * 3. The time at which the access token is stored in Redis is calculated based on the token using getRemainingSecondsForTokenExpiry.
+   * 4. It is stored as a key-value pair.
+   * 5. The set function removes duplicates, but duplicates do not cause significant errors and a value is not required.
+   * Unlike set, multiple values are not necessary.
+   * 6. The expireat function is used to specify the time-to-live (TTL).
+   * @param accessToken access token
    */
   async addToBlacklist(accessToken: string) {
     try {
-      console.log("******** in add to black list *******************");
       const isBlacklisted = await this.isTokenBlacklisted(accessToken);
-      console.log(isBlacklisted);
       if (isBlacklisted === ACCESS_TOKEN_VALUE) {
-        throw new UnauthorizedException(
-          "The access token is blacklisted. Access is denied."
-        );
+        throw new UnauthorizedException(ACCESS_TOKEN_BLACKLISTED);
       }
+
       const remainingSeconds =
         this.getRemainingSecondsForTokenExpiry(accessToken);
       if (remainingSeconds > 0) {
@@ -56,17 +57,15 @@ export class RedisService {
   }
 
   /**
-   * Access token에 대해 만료 시간까지 남은 시간을 초 단위로 반환합니다.
+   * Returns the remaining time in seconds until the expiration time of the access token
    * @param accessToken Access token
-   * @returns 토큰 만료까지 남은 시간 (초)
+   * @returns remaining time (Seconds)
    */
   getRemainingSecondsForTokenExpiry(accessToken: string) {
     try {
       const payload = this.jwtService.decode(accessToken);
       if (!payload["exp"])
-        throw new BadRequestException(
-          "Access token does not contain 'exp' claim."
-        );
+        throw new UnauthorizedException(ACCESS_TOKEN_PAYLOAD_ERROR);
       return payload["exp"] - Math.floor(Date.now() / 1000);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -74,29 +73,26 @@ export class RedisService {
   }
 
   /**
-   * Access token이 블랙리스트에 등록되어 있는지 확인합니다.
+   * Checks if the access token is registered on the blacklist
    * @param accessToken Access token
-   * @returns 토큰이 블랙리스트에 등록되어 있다면 1을 반환합니다.
+   * @returns retuns 1 if access token is blacklisted
    */
   async isTokenBlacklisted(accessToken: string) {
     try {
       return await this.blackListClient.get(accessToken);
     } catch (error) {
-      throw new InternalServerErrorException(
-        "Failed to find token in the blacklist."
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
   /**
-   * 새로운 푸드 데이터를 레디스에 추가
-   * Hashes는 Redis에서 여러 필드를 갖는 단일 키에 대한 값을 저장하기 위해 사용하기 적합한 데이터 유형입니다.
-   * 객체를 저장하기 위한 목적으로는 Hashes가 가장 자연스러운 선택입니다.
-   * Hashes는 필드와 값 사이의 매핑을 갖는 데이터 구조이며,
-   * 이 구조는 각 필드와 값을 Redis에서 내부적으로 연결합니다.
-   * 객체는 일반적으로 키-값 쌍을 포함하며, 이러한 구조는 Redis Hashes와 유사하게 작동합니다.
-   * 객체를 해시로 저장하면 객체의 각 필드를 Redis의 각 필드와 매핑하므로 빠르고 효율적인 검색이 가능합니다.
-   * @param openFoodFactsDto 데이터가 가지는 값중에 필요한부분
+   * Adds new food data to Redis.
+   * 1. If TTL is set in the env file, the value is set accordingly, otherwise it is set to 600 seconds.
+   * 2. The object is serialized.
+   * 3. It is stored in Redis using the hash data structure.
+   * 4. The expiration time is set.
+   * @param barcode barcode
+   * @param openFoodApiOutput data for save in Redis
    */
   async addToCacheFoodData(
     barcode: string,
@@ -105,6 +101,7 @@ export class RedisService {
     try {
       const ttlFormEnv = +this.configService.get("CACHE_TTL");
       const ttl = ttlFormEnv && ttlFormEnv > 0 ? ttlFormEnv : 600;
+
       const serializedData = JSON.stringify(openFoodApiOutput);
       await this.cacheClient.hset(barcode, barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
       await this.cacheClient.expireat(
@@ -117,9 +114,11 @@ export class RedisService {
   }
 
   /**
-   * 해당 바코드를 조회하여 존재한다면 푸드데이터 반환
-   * @param barcode food의 바코드 넘버
-   * @returns
+   * If the barcode exists, retrieves the food data and returns it as an object.
+   * 1. Searches for the data.
+   * 2. If it exists, converts it to an object and returns it.
+   * @param barcode barcode
+   * @returns Food data as Object
    */
   async getCachedFoodData(barcode: string) {
     try {

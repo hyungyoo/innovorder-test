@@ -15,10 +15,10 @@ import { JwtModule } from "@nestjs/jwt";
 import { FoodModule } from "./food/food.module";
 
 /**
- * env파일은 프로덕션환경에서는
- * aws같은곳에서 설정하니, non으로해야할수도있다.
- * ignoreEnvFile: process.env.NODE_ENV === "prod",
- *
+ * ConfigModule with joi
+ * TypeOrmModule for postgresSQL
+ * Redis for access token (black list) and food data (caching)
+ * apply middle ware
  */
 @Module({
   imports: [

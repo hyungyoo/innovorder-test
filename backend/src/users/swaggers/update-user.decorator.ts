@@ -53,10 +53,9 @@ export const CustomUserUpdate = (): MethodDecorator => {
     })(target, propertyKey, descriptor);
 
     ApiOperation({
-      summary:
-        "Update user information using user ID from access token 다시번역!",
+      summary: "Update user information using user",
       description:
-        "Find the user corresponding to the user ID and update the user",
+        "Find the user corresponding to the user ID from Access token and update the user",
     })(target, propertyKey, descriptor);
   };
 };

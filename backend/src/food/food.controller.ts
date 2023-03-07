@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { FoodService } from "./food.service";
-import { AccessTokenGuard } from "src/auth/guards/jwt.guard";
+import { AccessTokenGuard } from "src/auth/guards/jwt-access.guard";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 
 @ApiTags("Food")
@@ -15,6 +15,13 @@ import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 export class FoodController {
   constructor(private readonly foodService: FoodService) {}
 
+  /**
+   * Retrieve information from Open Food Facts using a barcode while logged in.
+   * 1. Authorize access to the access token and handle token renewal and blacklist registration through AccessTokenGuard and JwtHeaderInterceptor.
+   * Return a response based on the barcode.
+   * @param barcode
+   * @returns header (access token), body (food info)
+   */
   @UseGuards(AccessTokenGuard)
   @UseInterceptors(JwtHeaderInterceptor)
   @Get(":barcode")

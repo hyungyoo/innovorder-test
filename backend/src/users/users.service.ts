@@ -5,11 +5,19 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
-import { CreateUserInput, CreateUserOutput } from "./dtos/create-user.dto";
+import {
+  CreateUserInput,
+  CreateUserOutput,
+  UserWithoutPassword,
+} from "./dtos/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Users } from "./entities/user.entity";
 import { Repository } from "typeorm";
+import {
+  USER_CONFLICT_RESPONSE,
+  USER_NOT_FOUND_RESPONSE,
+} from "./constants/user.constants";
 
 @Injectable()
 export class UsersService {
@@ -21,6 +29,9 @@ export class UsersService {
   /**
    * It receives createUserInput as an argument
    * and is responsible for creating a new user.
+   * 1. Check if there is a user with the given ID.
+   * 2. Check for email duplication.
+   * 3. Create and return the user without password.
    * @param createUserInput
    * @returns Promise<CreateUserOutput>
    */
@@ -49,6 +60,9 @@ export class UsersService {
   /**
    * It receives updateUserInput and user's id as an argument
    * and is responsible for updating a user.
+   * 1. Check if there is a user with the given ID from access token.
+   * 2. Check for email duplication.
+   * 3. Update and return the user without password and refresh token.
    * @param id
    * @param updateUserInput
    * @returns Promise<UpdateUserOutput>
@@ -60,25 +74,48 @@ export class UsersService {
     try {
       const user = await this.findUserById(id);
       if (!user) {
-        throw new NotFoundException(`User with ${id} not found`);
+        throw new NotFoundException(USER_NOT_FOUND_RESPONSE);
       }
+
       if (updateUserInput.email) {
         const isEmailExists = await this.checkEmailExists(
           updateUserInput.email
         );
         if (isEmailExists && user.email === updateUserInput.email) {
-          throw new ConflictException("That email already exists for a user");
+          return this.getReturnValue();
         }
       }
+
       const { password, refreshToken, ...updatedUser } =
         await this.usersRepository.save(
           this.usersRepository.create({ ...user, ...updateUserInput })
         );
-      return {
-        success: true,
-        code: HttpStatus.OK,
-        data: { user: updatedUser },
-      };
+      return this.getReturnValue(updatedUser);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  /**
+   * Returns response
+   * @param user
+   * @returns success (boolean), code (number),  data or error
+   */
+  getReturnValue(user?: UserWithoutPassword) {
+    try {
+      if (user) {
+        return {
+          success: true,
+          code: HttpStatus.OK,
+          data: { user },
+        };
+      } else {
+        return {
+          success: true,
+          code: HttpStatus.CONFLICT,
+          error: { message: USER_CONFLICT_RESPONSE },
+        };
+      }
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -111,11 +148,3 @@ export class UsersService {
     }
   }
 }
-
-// async findAll() {
-//   return `This action returns all users`;
-// }
-
-// findOne(id: number) {
-//   return `This action returns a #${id} user`;
-// }

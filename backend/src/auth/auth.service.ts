@@ -8,7 +8,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
-import { AUTH_UNAUTHORIZED } from "./constants/auth.constant";
+import { AUTH_UNAUTHORIZED } from "./interfaces/auth.interface";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
@@ -17,6 +17,9 @@ import { RefreshOutput } from "./dtos/refresh.dto";
 
 @Injectable()
 export class AuthService {
+  /**
+   * Tokens to be used in JWT interceptor
+   */
   private _tokens: [string, string];
 
   constructor(
@@ -26,10 +29,12 @@ export class AuthService {
   ) {}
 
   /**
-   * 유저 id를 이용하여 접근토큰과 리프레쉬토큰을 발급한후, 리프레쉬토큰을 해쉬화하여
-   * 유저정보에 업데이트한다.
-   * @param user authUser 데코레이터로 부터 넘겨받은 유저정보
-   * @returns
+   * Generate and return tokens using the user ID.
+   * 1. Generate access and refresh tokens using the user ID.
+   * 2. Hash the refresh token and update the user information.
+   * 3. Add tokens to the header using the interceptor.
+   * @param user user
+   * @returns body (user), header (access token, refresh token)
    */
   async login(user: UserWithoutPassword): Promise<LoginOutput> {
     try {
@@ -47,9 +52,9 @@ export class AuthService {
   }
 
   /**
-   * 로그아웃에서는 아무것도안줘도된다
-   * 접근토큰은 남아있기때문에, redis의 블랙리스트에등록.
-   * @param user
+   * Delete the user's refresh token
+   * 1. Access the user information and initialize the refresh token to null.
+   * @param user user
    */
   async logout({ id }: UserWithoutPassword): Promise<LogoutOutput> {
     try {
@@ -71,10 +76,8 @@ export class AuthService {
   }
 
   /**
-   * 유저로 부터 받은 리프레쉬토큰으로 유저정보를 파악, 해쉬화된 유저의 리프레쉬토큰과 비교후
-   * 정보가 맞다면, 유저에게 기존 리프레쉬토큰과 새로운 접근토큰을 발급.
-   * @param id 유저 아이디 @param refreshToken 유저 리프레쉬토큰
-   * @returns success: true, 상태코드 : ok, 헤더의 authorization에 새로운 토큰값
+   * return success and code
+   * @returns header (refresh token, access token) body (success, code)
    */
   async refresh(): Promise<RefreshOutput> {
     return {
@@ -99,9 +102,11 @@ export class AuthService {
   }
 
   /**
-   * 유저아이디를 페이로드에 넣고, env로부터 expiration 시간과 시크릿을 받아 접근토큰과 리프레시토큰을 발행
-   * @param id 유저 아이디
-   * @returns 접근토큰과 리프레쉬토큰
+   * Generate access token and refresh token using user id.
+   * 1. Input user id for payload of tokens.
+   * 2. Receive expiration time and secret from config service and issue access token and refresh token.
+   * @param id user id
+   * @returns [access_token, refresh_token]
    */
   generateTokens(id: number) {
     try {
@@ -127,11 +132,12 @@ export class AuthService {
   }
 
   /**
-   * create를 하면, 유저 엔티티에있는 hashRefreshToken 메서드가 beforeUpdate 데코레이터에 의해서
-   * 호출됨. 파라미터로 받은 refreshToken을 해쉬화하여 저장함
-   * @param id 유저 id
-   * @param refreshToken 해쉬화 되어야할 유저의 리프레쉬토큰
-   * @returns
+   * Update user's refresh token in the user's data.
+   * 1. The hashRefreshToken method in the user entity is called by @beforeUpdate.
+   * 2. The received refreshToken parameter is hashed and stored.
+   * @param id user id
+   * @param refreshToken refresh token
+   * @returns updated user
    */
   updateHashedRefreshToken(id: number, refreshToken: string) {
     try {
@@ -143,10 +149,12 @@ export class AuthService {
   }
 
   /**
-   * 로컬 strategy에서 호출되는 메서드로서 이메일과비밀번호를 받아 유저정보를 반환함
-   * @param email stragegy의 파라미터중에 username 필드를 변경함
-   * @param password 유저가 보내는 비밀번호
-   * @returns 유저정보 또는 Null값
+   * Call local strategy that receives email and password and returns user information.
+   * 1. Retrieve user information corresponding to the user's email from the database.
+   * 2. If the password matches as well, return user information except for the password
+   * @param email user email
+   * @param password user password
+   * @returns user or null
    */
   async validateUser(email: string, password: string) {
     try {
@@ -169,20 +177,6 @@ export class AuthService {
         return result;
       }
       return null;
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-
-  /**
-   * 유저의 id를 받아, 새로운 접근토큰을 만을 발급하여 클라이언트의 헤더에 추가.
-   * jwt에서의 페이로드로 로그인을 한 후에, 해당 id로 새로운 접근토큰을 생성
-   * @param id 유저 id
-   */
-  async generateNewAccessToken(id: number) {
-    try {
-      const [access] = await this.generateTokens(id);
-      this.tokens = [access, undefined];
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

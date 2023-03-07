@@ -1,3 +1,7 @@
+
+/**
+ * dtos for open food facts
+ */
 export interface OpenFoodFactsDto {
   status: number;
   data: {
