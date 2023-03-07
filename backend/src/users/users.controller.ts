@@ -28,9 +28,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   /**
-   *
-   * @param createUserInput 유저생성을 하기위한 정보
-   * @returns 성공 불린값, http 상태코드, 데이터
+   * Checks only for duplicate emails among the incoming arguments
+   * and creates a user based on that
+   * @param createUserInput  email, password, firstName, lastName
+   * @returns created user
    */
   @CustomUserCreate()
   @Post()
@@ -41,10 +42,15 @@ export class UsersController {
   }
 
   /**
-   *
+   * Updates user information after verifying it from jwt.
+   * 1. Obtains user information from AccessTokenGuard.
+   * 2. Extracts the user id from the AuthUser decorator and passes it as an argument to updateUser.
+   * 3. Registers the default access token on the blacklist.
+   * 4. Updates the user.
+   * 5. Sets a new access token in the response header.
    * @param user
    * @param updateUserInput
-   * @returns
+   * @returns updated user
    */
   @CustomUserUpdate()
   @UseGuards(AccessTokenGuard)
@@ -57,30 +63,3 @@ export class UsersController {
     return this.usersService.updateUser(id, updateUserInput);
   }
 }
-
-// @CustomUserUpdate()
-// @Patch(":id")
-// updateUserById(
-//   @Param("id", ParseIntPipe) id: number,
-//   @Body() updateUserInput: UpdateUserInput
-// ): Promise<UpdateUserOutput> {
-//   return this.usersService.updateUser(id, updateUserInput);
-// }
-
-// @ApiOperation({ summary: "get all users" })
-// @Get()
-// findAll() {
-//   return this.usersService.findAll();
-// }
-
-// @ApiOperation({ summary: "get user by user id" })
-// @Get(":id")
-// findOne(@Param("id") id: string) {
-//   return this.usersService.findOne(+id);
-// }
-
-// @ApiOperation({ summary: "delete user" })
-// @Delete(":id")
-// remove(@Param("id") id: string) {
-//   return this.usersService.remove(+id);
-// }

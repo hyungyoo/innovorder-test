@@ -3,7 +3,10 @@ import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entites/core.entity";
 import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcryptjs";
-import { UnprocessableEntityException } from "@nestjs/common";
+import {
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { SALT_ROUNDS } from "src/common/constants/core.constants";
 import { USER_UNPROCESSABLE_ENTITY } from "src/users/constants/user.constants";
 
@@ -64,12 +67,9 @@ export class Users extends CoreEntity {
   refreshToken?: string;
 
   /**
-   * hashing the password with bcrypt
-   * Before a user entity is saved or updated,
-   * the password of the object is hashed.
+   * hashing the password with bcrypt before a user entity is saved or updated,
    * If the password is included in the updateUserDto during an update,
    * then the password is hashed
-   * If bcrypt throws an error, raise an UnprocessableEntityException.
    */
   @BeforeInsert()
   @BeforeUpdate()
@@ -78,16 +78,14 @@ export class Users extends CoreEntity {
       if (this.password) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.password = await bcrypt.hash(this.password, salt);
-        console.log(this.password);
       }
     } catch (error) {
-      error;
-      throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
+      throw new UnprocessableEntityException(error);
     }
   }
 
   /**
-   * 엔티티가 생성되고 업데이트되는순간 리프레쉬토큰을 해쉬화하여저장
+   * Before update, refresh token is hashed and saved
    */
   @BeforeUpdate()
   async hashRefreshToken(): Promise<void> {
@@ -95,7 +93,6 @@ export class Users extends CoreEntity {
       if (this.refreshToken) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
-        console.log("i am called in hashRefreshToken");
       }
     } catch (error) {
       console.log(error);
@@ -103,8 +100,16 @@ export class Users extends CoreEntity {
     }
   }
 
+  /**
+   * Compare password as parameter and hashed password
+   * @param password
+   * @returns boolean
+   */
   async comparePassword(password: string) {
-    if (!this.password) throw new Error("password is not set");
-    return bcrypt.compare(password, this.password);
+    try {
+      return bcrypt.compare(password, this.password);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }
