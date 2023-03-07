@@ -1,14 +1,25 @@
-import { ExecutionContext, createParamDecorator } from "@nestjs/common";
+import {
+  ExecutionContext,
+  InternalServerErrorException,
+  UnauthorizedException,
+  createParamDecorator,
+} from "@nestjs/common";
+import { AUTH_USER_NOT_FOUND } from "../interfaces/auth.interface";
 
 /**
- * 컨트롤러에서 request를 받아서 유저를 찾아내는것을 authUser데코레이터에서 수행함
+ * This decorator receives a contenxt and finds the user and return it.
+ * 1. It goes through guards and interceptors to only return the user added to the request.
+ * 2. This ensures that the controller does not directly access the request using @req.
  */
 export const AuthUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    console.log(
-      "***************authUser custom decorator************************"
-    );
-    const request = ctx.switchToHttp().getRequest();
-    return request.user;
+  (_: unknown, ctx: ExecutionContext) => {
+    try {
+      const request = ctx.switchToHttp().getRequest();
+      const user = request.user;
+      if (!user) throw new UnauthorizedException(AUTH_USER_NOT_FOUND);
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 );

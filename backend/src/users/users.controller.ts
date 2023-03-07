@@ -17,7 +17,7 @@ import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
 import { CustomUserCreate } from "src/users/swaggers/create-user.decorators";
 import { CustomUserUpdate } from "src/users/swaggers/update-user.decorator";
 import { Users } from "./entities/user.entity";
-import { AccessTokenGuard } from "src/auth/guards/jwt.guard";
+import { AccessTokenGuard } from "src/auth/guards/jwt-access.guard";
 import { AuthUser } from "src/auth/decorators/auth-user.decorator";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 

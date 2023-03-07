@@ -1,14 +1,28 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { PayloadType } from "src/auth/interfaces/payload.interface";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcryptjs";
 import { RefreshInput } from "src/auth/dtos/refresh.dto";
+import {
+  PayloadType,
+  REFRESH_TOKEN_NOT_ALLOWED,
+} from "src/auth/interfaces/auth.interface";
 
+/**
+ * Function that extracts the refresh token from header
+ * 1. Accesses the cookie in the request header and splits it by ";"
+ * 2. Extracts only the token part from the element that starts with "refresh_token=" and returns it.
+ * @param request request
+ * @returns refresh token
+ */
 function refreshJwtFromReq(request: Request) {
   if (request && request.headers && request.headers["cookie"])
     return request.headers["cookie"]
@@ -38,30 +52,34 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
 
   /**
-   * 이후에 리프레쉬토큰은 잠시 비교만하는건지?
-   * 아 비교맞음. comparer ok!
-   * 비교까지되면 유저에 헤더로부터 받은 리프레쉬토큰을 넣어서 리턴
-   * @param _ request : 해쉬화된 토큰값을 얻어올수있음
-   * @param param1 payload, user id
-   * @returns user정보를 요청에추가
+   * If the refresh token matches the hashed refresh token of the user, return the user.
+   * 1. Extract the user from the cookie section of the request.
+   * 2. Compare the hashed refresh token from the extracted user with the refresh token from the request.
+   * 3. If they match, add the refresh token from the request to the user and return the user.
+   * @param req request
+   * @param payload payload of refresh token
+   * @returns user with refresh token
    */
   async validate(req: Request, { id }: PayloadType) {
-    const refreshtokenFromHeader = refreshJwtFromReq(req);
-    const user: RefreshInput = await this.userRepository.findOne({
-      where: { id },
-      select: ["id", "refreshToken"],
-    });
-    if (!(refreshtokenFromHeader && user.refreshToken))
-      throw new UnauthorizedException(
-        "다시 로그인을 해주세요. 로그아웃을하였던가 토큰이없어"
+    try {
+      const refreshtokenFromHeader = refreshJwtFromReq(req);
+      const user: RefreshInput = await this.userRepository.findOne({
+        where: { id },
+        select: ["id", "refreshToken"],
+      });
+      if (!(refreshtokenFromHeader && user.refreshToken))
+        throw new UnauthorizedException(REFRESH_TOKEN_NOT_ALLOWED);
+
+      const isMatchRefreshToken = await bcrypt.compareSync(
+        refreshtokenFromHeader,
+        user.refreshToken || null
       );
-    const isMatchRefreshToken = await bcrypt.compareSync(
-      refreshtokenFromHeader,
-      user.refreshToken || null
-    );
-    if (!isMatchRefreshToken)
-      throw new UnauthorizedException("토큰이 달라서 권한없음");
-    user.refreshToken = refreshtokenFromHeader;
-    return user;
+      if (!isMatchRefreshToken)
+        throw new UnauthorizedException(REFRESH_TOKEN_NOT_ALLOWED);
+      user.refreshToken = refreshtokenFromHeader;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }
