@@ -1,45 +1,37 @@
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
+  ApiCreatedResponse,
   ApiOperation,
   ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
 import {
   UserApiConflictResponse,
-  UserApiOkResponse,
+  UserApiCreatedResponse,
   UserBadRequestResponse,
-  UserNotFoundResponse,
   UserUnprocessableEntity,
-} from "../swaggers/user.swagger";
+} from "./user.swagger";
 import {
   USER_BAD_REQUEST_RESPONSE,
   USER_CONFLICT_RESPONSE,
-  USER_NOT_FOUND_RESPONSE,
-  USER_OK_RESPONSE,
+  USER_CREATED_RESPONSE,
   USER_UNPROCESSABLE_ENTITY,
 } from "src/users/constants/user.constants";
 
-export const CustomUserUpdate = (): MethodDecorator => {
+export const CustomUserCreate = (): MethodDecorator => {
   return (
     target: Object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
-    ApiOkResponse({
-      description: USER_OK_RESPONSE,
-      type: UserApiOkResponse,
+    ApiCreatedResponse({
+      description: USER_CREATED_RESPONSE,
+      type: UserApiCreatedResponse,
     })(target, propertyKey, descriptor);
 
     ApiConflictResponse({
       description: USER_CONFLICT_RESPONSE,
       type: UserApiConflictResponse,
-    })(target, propertyKey, descriptor);
-
-    ApiNotFoundResponse({
-      description: USER_NOT_FOUND_RESPONSE,
-      type: UserNotFoundResponse,
     })(target, propertyKey, descriptor);
 
     ApiUnprocessableEntityResponse({
@@ -53,10 +45,9 @@ export const CustomUserUpdate = (): MethodDecorator => {
     })(target, propertyKey, descriptor);
 
     ApiOperation({
-      summary:
-        "Update user information using user ID from access token 다시번역!",
+      summary: "Creates a new user",
       description:
-        "Find the user corresponding to the user ID and update the user",
+        "Create a user by receiving email, last name, first name, and password.",
     })(target, propertyKey, descriptor);
   };
 };

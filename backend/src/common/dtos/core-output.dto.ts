@@ -1,3 +1,4 @@
+import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsNumber } from "class-validator";
 
@@ -14,7 +15,7 @@ export class CoreOutput {
   success: boolean;
 
   @ApiProperty({
-    example: 201,
+    example: HttpStatus.CREATED,
     description: "Status code value",
     required: true,
   })

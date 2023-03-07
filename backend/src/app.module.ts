@@ -14,12 +14,18 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { FoodModule } from "./food/food.module";
 
+/**
+ * env파일은 프로덕션환경에서는
+ * aws같은곳에서 설정하니, non으로해야할수도있다.
+ * ignoreEnvFile: process.env.NODE_ENV === "prod",
+ *
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: path.join(__dirname, `.env.${process.env.NODE_ENV}`),
-      ignoreEnvFile: process.env.NODE_ENV === "prod",
+      ignoreEnvFile: false,
       validationSchema: joi.object({
         POSTGRES_HOST: joi.string().required(),
         POSTGRES_PORT: joi.string().required(),

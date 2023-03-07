@@ -1,7 +1,6 @@
 import { ExecutionContext, Injectable } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { ExtractJwt } from "passport-jwt";
-import { Observable } from "rxjs";
 import { RedisService } from "src/redis/redis.service";
 
 @Injectable()

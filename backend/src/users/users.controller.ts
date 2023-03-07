@@ -14,8 +14,8 @@ import {
 } from "./dtos/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
-import { CustomUserCreate } from "src/users/decorators/create-user.decorators";
-import { CustomUserUpdate } from "src/users/decorators/update-user.decorator";
+import { CustomUserCreate } from "src/users/swaggers/create-user.decorators";
+import { CustomUserUpdate } from "src/users/swaggers/update-user.decorator";
 import { Users } from "./entities/user.entity";
 import { AccessTokenGuard } from "src/auth/guards/jwt.guard";
 import { AuthUser } from "src/auth/decorators/auth-user.decorator";

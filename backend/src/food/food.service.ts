@@ -8,6 +8,8 @@ import { ConfigService } from "@nestjs/config";
 import { AxiosError } from "axios";
 import { catchError, firstValueFrom } from "rxjs";
 import { RedisService } from "src/redis/redis.service";
+import { OpenFoodFactsDto } from "./dtos/food.dto";
+import { FoodOutput } from "./dtos/find.food.dto";
 
 @Injectable()
 export class FoodService {
@@ -17,30 +19,36 @@ export class FoodService {
     private readonly redisService: RedisService
   ) {}
 
-  async findFood(barcode: number) {
+  /**
+   *
+   * @param barcode 상품바코드
+   * @returns success (boolean), code (number), data or error
+   */
+  async findFoodByBarcode(barcode: number): Promise<FoodOutput> {
     try {
+      // 바코드조회후 있으면 바로 반환
+      
       const url = this.configService.get("FOOD_API_URL");
       const extention = this.configService.get("FOOD_API_EXTENTSION");
       const {
         status,
-        statusText,
-        data: { code, product, status: dataStatus, status_verbose },
-      } = await firstValueFrom(
+        data: { product, status_verbose },
+      }: OpenFoodFactsDto = await firstValueFrom(
         this.httpService.get(`${url}/${barcode}/${extention}`).pipe(
           catchError((error: AxiosError) => {
             throw new NotFoundException(error);
           })
         )
       );
-
-      console.log(status);
-      console.log(statusText);
-      console.log(code);
-      console.log(product);
-      console.log(dataStatus);
-      console.log(status_verbose);
-      console;
-      return;
+      if (product) {
+        // 캐쉬에 저장
+        return {
+          success: true,
+          code: status,
+          data: { product: product },
+        };
+      }
+      throw new NotFoundException(status_verbose);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
