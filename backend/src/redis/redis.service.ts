@@ -8,6 +8,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { Redis } from "ioredis";
 import { ACCESS_TOKEN_VALUE } from "./constants/redis.constants";
+import { OpenFoodFactsDto } from "src/food/dtos/food.dto";
 
 @Injectable()
 export class RedisService {
@@ -81,5 +82,21 @@ export class RedisService {
         "Failed to find token in the blacklist."
       );
     }
+  }
+
+  /**
+   * 새로운 푸드 데이터를 레디스에 추가
+   * @param openFoodFactsDto
+   */
+  async addToCacheFoodData(openFoodFactsDto: OpenFoodFactsDto) {}
+
+
+  /**
+   * 해당 바코드를 조회하여 존재한다면 푸드데이터 반환
+   * @param barcode food의 바코드 넘버
+   * @returns 
+   */
+  async getCachedFoodData(barcode: number): Promise<OpenFoodFactsDto> {
+    return;
   }
 }

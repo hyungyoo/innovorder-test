@@ -27,28 +27,37 @@ export class FoodService {
   async findFoodByBarcode(barcode: number): Promise<FoodOutput> {
     try {
       // 바코드조회후 있으면 바로 반환
-      
+      //  getCachedFoodData => data반환? 바로 리턴
+
+      const {
+        status: code,
+        data: { product, status_verbose },
+      }: OpenFoodFactsDto = await this.getFoodData(barcode);
+      if (product) {
+        // 캐쉬에 저장
+        return {
+          success: true,
+          code,
+          data: { product: product },
+        };
+      }
+      throw new NotFoundException(status_verbose);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async getFoodData(barcode: number): Promise<OpenFoodFactsDto> {
+    try {
       const url = this.configService.get("FOOD_API_URL");
       const extention = this.configService.get("FOOD_API_EXTENTSION");
-      const {
-        status,
-        data: { product, status_verbose },
-      }: OpenFoodFactsDto = await firstValueFrom(
+      return firstValueFrom(
         this.httpService.get(`${url}/${barcode}/${extention}`).pipe(
           catchError((error: AxiosError) => {
             throw new NotFoundException(error);
           })
         )
       );
-      if (product) {
-        // 캐쉬에 저장
-        return {
-          success: true,
-          code: status,
-          data: { product: product },
-        };
-      }
-      throw new NotFoundException(status_verbose);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
