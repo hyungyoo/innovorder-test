@@ -108,7 +108,7 @@ export class UsersService {
       };
     } else {
       return {
-        success: true,
+        success: false,
         code: HttpStatus.CONFLICT,
         error: { message: USER_CONFLICT_RESPONSE },
       };

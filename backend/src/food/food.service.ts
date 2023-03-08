@@ -48,22 +48,18 @@ export class FoodService {
    * @returns
    */
   async getReturnValue(data: OpenFoodApiOutput) {
-    try {
-      if (data.product) {
-        return {
-          success: true,
-          code: HttpStatus.OK,
-          data: { product: data.product },
-        };
-      } else {
-        return {
-          success: false,
-          code: HttpStatus.NOT_FOUND,
-          error: { message: data.status_verbose },
-        };
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(error);
+    if (data.product) {
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        data: { product: data.product },
+      };
+    } else {
+      return {
+        success: false,
+        code: HttpStatus.NOT_FOUND,
+        error: { message: data.status_verbose },
+      };
     }
   }
 
