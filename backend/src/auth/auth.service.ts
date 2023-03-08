@@ -14,6 +14,7 @@ import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
 import { LogoutOutput } from "./dtos/logout.dto";
 import { RefreshOutput } from "./dtos/refresh.dto";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AuthService {
@@ -171,12 +172,25 @@ export class AuthService {
         ],
       });
       if (!user) throw new UnauthorizedException(AUTH_UNAUTHORIZED);
-      const isMatch = await user.comparePassword(password);
+      const isMatch = await this.comparePassword(password, user.password);
       if (isMatch) {
         const { password, ...result } = user;
         return result;
       }
       return null;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  /**
+   * Compare password as parameter and hashed password
+   * @param password
+   * @returns boolean
+   */
+  async comparePassword(password: string, hashedPassword: string) {
+    try {
+      return bcrypt.compare(password, hashedPassword);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

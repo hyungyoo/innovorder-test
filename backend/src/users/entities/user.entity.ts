@@ -3,10 +3,7 @@ import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entites/core.entity";
 import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcryptjs";
-import {
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from "@nestjs/common";
+import { UnprocessableEntityException } from "@nestjs/common";
 import { SALT_ROUNDS } from "src/common/constants/core.constants";
 import { USER_UNPROCESSABLE_ENTITY } from "src/users/constants/user.constants";
 
@@ -73,7 +70,7 @@ export class Users extends CoreEntity {
    */
   @BeforeInsert()
   @BeforeUpdate()
-  async hashPassword(): Promise<void> {
+  private async hashPassword(): Promise<void> {
     try {
       if (this.password) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
@@ -88,7 +85,7 @@ export class Users extends CoreEntity {
    * Before update, refresh token is hashed and saved
    */
   @BeforeUpdate()
-  async hashRefreshToken(): Promise<void> {
+  private async hashRefreshToken(): Promise<void> {
     try {
       if (this.refreshToken) {
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
@@ -97,19 +94,6 @@ export class Users extends CoreEntity {
     } catch (error) {
       console.log(error);
       throw new UnprocessableEntityException(USER_UNPROCESSABLE_ENTITY);
-    }
-  }
-
-  /**
-   * Compare password as parameter and hashed password
-   * @param password
-   * @returns boolean
-   */
-  async comparePassword(password: string) {
-    try {
-      return bcrypt.compare(password, this.password);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
     }
   }
 }

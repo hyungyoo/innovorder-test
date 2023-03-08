@@ -6,12 +6,12 @@ import {
   MockTypeRepository,
   createUserInput,
   createUserOutput,
+  updateUserInput,
   userFromDB,
 } from "src/common/test/unit-test.interface";
 import { MockRepository } from "src/common/test/unit-test.mock";
 import { InternalServerErrorException } from "@nestjs/common";
 import { USER_CONFLICT_RESPONSE } from "./constants/user.constants";
-import { CreateUserOutput } from "./dtos/create-user.dto";
 
 describe("UsersService", () => {
   let usersService: UsersService;
@@ -87,10 +87,24 @@ describe("UsersService", () => {
   });
 
   describe("updateUser", () => {
-    it.todo("should failed to obtain user information from the given user ID");
-    it.todo("should throw a ConflictException when the email already exists");
-    it.todo("should failed to update the user, server error output");
-    it.todo("should successfully updated the user");
+    it("should failed to obtain user information from the given user ID", async () => {
+      jest.spyOn(usersService, "findUserById").mockRejectedValue(undefined);
+
+      await expect(
+        usersService.updateUser(expect.any(Number), updateUserInput)
+      ).rejects.toThrowError();
+
+      expect(usersService.findUserById).toBeCalledTimes(1);
+      expect(usersService.findUserById).toBeCalledWith(expect.any(Number));
+    });
+
+    it("should throw a ConflictException when the email already exists", async () => {
+      jest
+        .spyOn(usersService, "findUserById")
+        .mockResolvedValueOnce(userFromDB);
+    });
+    it("should failed to update the user, server error output", async () => {});
+    it("should successfully updated the user", async () => {});
   });
 
   describe("getReturnValue", () => {

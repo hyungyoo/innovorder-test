@@ -1,7 +1,9 @@
+import { OmitType } from "@nestjs/mapped-types";
 import {
   CreateUserInput,
   CreateUserOutput,
 } from "src/users/dtos/create-user.dto";
+import { UpdateUserInput } from "src/users/dtos/update-user.dto";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 
@@ -31,6 +33,12 @@ export const createUserOutput: CreateUserOutput = {
   },
 };
 
+export const updateUserInput: UpdateUserInput = {
+  email: "changed@gmail.com",
+};
+
+export class UserFromDB extends Users {}
+
 export const userFromDB = {
   id: expect.any(Number),
   email: "hyungyoo@gmail.com",
@@ -40,4 +48,4 @@ export const userFromDB = {
   createdAt: expect.any(Date),
   updatedAt: expect.any(Date),
   refreshToken: expect.any(String),
-} as const;
+};
