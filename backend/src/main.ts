@@ -30,3 +30,23 @@ async function bootstrap() {
   });
 }
 bootstrap();
+
+// @Catch(HttpException)
+// export class HttpExceptionFilter implements ExceptionFilter {
+//   catch(
+//     exception: HttpException,
+//     host: ArgumentsHost
+//   ): Response<HttpExceptionOutput> {
+//     const context = host.switchToHttp();
+//     const response = context.getResponse<Response>();
+//     const status = exception.getStatus();
+
+//     const error = exception.getResponse();
+
+//     return response.status(status).json({
+//       success: false,
+//       code: error["status"] || error["statusCode"],
+//       error: { message: error["message"] },
+//     });
+//   }
+// }

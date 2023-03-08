@@ -5,9 +5,14 @@ import {
   CreateUserOutput,
 } from "src/users/dtos/create-user.dto";
 import { Repository } from "typeorm";
+import * as redis from "redis";
 
 export type MockTypeRepository<T> = Partial<
   Record<keyof Repository<T>, jest.Mock>
+>;
+
+export type MockRedisType = Partial<
+  Record<keyof redis.RedisFunctions, jest.Mock>
 >;
 
 export const createUserInput: CreateUserInput = {
@@ -70,4 +75,19 @@ export const updateUserOutputFail = {
   success: false,
   code: HttpStatus.CONFLICT,
   error: { message: USER_CONFLICT_RESPONSE },
+};
+
+export const accessToken = "withExp";
+
+export const accessTokenWithoutExp = "withoutExp";
+
+export const payloadWithExp = {
+  id: 1,
+  iat: "iat",
+  exp: "exp",
+};
+
+export const payloadWithoutExp = {
+  id: 1,
+  iat: "iat",
 };

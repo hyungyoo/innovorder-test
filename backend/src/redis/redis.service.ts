@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -8,6 +10,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Redis } from "ioredis";
 import {
   ACCESS_TOKEN_BLACKLISTED,
+  ACCESS_TOKEN_EXPIRED,
   ACCESS_TOKEN_PAYLOAD_ERROR,
   ACCESS_TOKEN_VALUE,
 } from "./interfaces/redis.constants";
@@ -29,17 +32,26 @@ export class RedisService {
    * 1. Receives an access token as an argument and checks if it is on the blacklist.
    * 2. After new access token is issued, the previous access token is registered on the blacklist.
    * 3. The time at which the access token is stored in Redis is calculated based on the token using getRemainingSecondsForTokenExpiry.
-   * 4. It is stored as a key-value pair.
-   * 5. The set function removes duplicates, but duplicates do not cause significant errors and a value is not required.
+   * 4. if remainning secondes is under 0, access token is expired, so unauthorized.
+   * 5. It is stored as a key-value pair.
+   * 6. The set function removes duplicates, but duplicates do not cause significant errors and a value is not required.
    * Unlike set, multiple values are not necessary.
-   * 6. The expireat function is used to specify the time-to-live (TTL).
+   * 7. The expireat function is used to specify the time-to-live (TTL).
    * @param accessToken access token
    */
   async addToBlacklist(accessToken: string) {
     try {
-      const isBlacklisted = await this.isTokenBlacklisted(accessToken);
-      if (isBlacklisted === ACCESS_TOKEN_VALUE) {
-        throw new UnauthorizedException(ACCESS_TOKEN_BLACKLISTED);
+      const blacklistedAccessToken = await this.blackListClient.get(
+        accessToken
+      );
+      if (
+        blacklistedAccessToken !== null &&
+        blacklistedAccessToken === ACCESS_TOKEN_VALUE
+      ) {
+        throw new HttpException(
+          ACCESS_TOKEN_BLACKLISTED,
+          HttpStatus.UNAUTHORIZED
+        );
       }
 
       const remainingSeconds =
@@ -50,9 +62,10 @@ export class RedisService {
           accessToken,
           Math.floor(Date.now() / 1000) + remainingSeconds
         );
-      }
+      } else
+        throw new HttpException(ACCESS_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
     } catch (error) {
-      throw new UnauthorizedException(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -65,22 +78,13 @@ export class RedisService {
     try {
       const payload = this.jwtService.decode(accessToken);
       if (!payload["exp"])
-        throw new UnauthorizedException(ACCESS_TOKEN_PAYLOAD_ERROR);
+        throw new HttpException(
+          ACCESS_TOKEN_PAYLOAD_ERROR,
+          HttpStatus.UNAUTHORIZED
+        );
       return payload["exp"] - Math.floor(Date.now() / 1000);
     } catch (error) {
-      throw new UnauthorizedException(error);
-    }
-  }
-
-  /**
-   * Checks if the access token is registered on the blacklist
-   * @param accessToken Access token
-   * @returns value of key-value : ""
-   */
-  async isTokenBlacklisted(accessToken: string) {
-    try {
-      return await this.blackListClient.get(accessToken);
-    } catch (error) {
+      console.log("why?");
       throw new InternalServerErrorException(error);
     }
   }
