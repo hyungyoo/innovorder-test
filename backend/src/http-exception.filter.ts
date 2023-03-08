@@ -37,15 +37,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     ) {
       return response.status(status).json({
         success: false,
-        code: status,
+        code: error["status"],
         error: { message: error.message },
       });
     }
-    console.log(status, " is status");
-    console.log(error, " is error");
+    // console.log(error["status"], " is error");
     return response.status(status).json({
       success: false,
-      code: status,
+      code: error["status"],
       error: { message: error.message },
     });
   }
