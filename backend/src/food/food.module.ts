@@ -5,11 +5,9 @@ import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
-    HttpModule.registerAsync({
-      useFactory: () => ({
-        timeout: +process.env.HTTP_TIMEOUT || 5000,
-        maxRedirects: +process.env.HTTP_MAX_REDIRECTS || 5,
-      }),
+    HttpModule.register({
+      timeout: +process.env.HTTP_TIMEOUT || 5000,
+      maxRedirects: +process.env.HTTP_MAX_REDIRECTS || 5,
     }),
   ],
   providers: [FoodService],

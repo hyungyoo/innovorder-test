@@ -5,7 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from "@nestjs/common";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { HttpExceptionOutput } from "./common/dtos/http-exception.output.dto";
 
 /**
@@ -23,7 +23,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
   ): Response<HttpExceptionOutput> {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
-    const reqeust = context.getRequest<Request>();
     const status = exception.getStatus();
     const error = exception.getResponse() as
       | { message: any; statusCode: number }
@@ -42,7 +41,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         error: { message: error.message },
       });
     }
-    response.status(status).json({
+    console.log(status, " is status");
+    console.log(error, " is error");
+    return response.status(status).json({
       success: false,
       code: status,
       error: { message: error.message },

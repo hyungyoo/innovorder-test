@@ -1,42 +1,95 @@
 # user-backend-api
 
-## For env file : .env.dev
+</br>
+
+## Env file 설정 : .env.dev
 
 ```env
 ## postgres
-POSTGRES_HOST=
-POSTGRES_PORT=
-POSTGRES_PASSWORD=
-POSTGRES_USERNAME=
-POSTGRES_DB=
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_PASSWORD=postgres
+POSTGRES_USERNAME=postgres
+POSTGRES_DB=user
 
-## backend
-APP_PORT=
-BACKEND_PORT=
-API_VERSION=
+## backend (not required)
+APP_PORT=8080
+BACKEND_PORT=3000
+
+## api version
+API_VERSION=1.0
 
 ## jwt
-JWT_ACCESS_SECRET=
-JWT_REFRESH_SECRET=
-JWT_ACCESS_EXPIRATION_TIME=
-JWT_REFRESH_EXPIRATION_TIME=
+JWT_ACCESS_SECRET=jwtaccesskey
+JWT_REFRESH_SECRET=jwtrefreshkey
+JWT_ACCESS_EXPIRATION_TIME=10m
+JWT_REFRESH_EXPIRATION_TIME=1d
 
 ## redis
-REDIS_HOST=
-REDIS_PORT=
+REDIS_HOST=redis
+REDIS_PORT=6379
+## (not required)
+CACHE_TTL=600
+
+## http Module (not required)
+HTTP_TIMEOUT=5000
+HTTP_MAX_REDIRECTS=5
+
+## open food api
+FOOD_API_URL=https://world.openfoodfacts.org/api/v0/product/
+FOOD_API_EXTENSION=json
 ```
+
+---
+
+</br>
+</br>
+
+## Docker
+
+- docker compose
+
+</br>
+</br>
+
+---
+
+## Makefile
+
+- make
+  ```
+  docker-compose --env-file [file_path] up --build
+  ```
+
+---
+
+##
+
+</br>
+</br>
+
+## API swagger
+
+```
+localhost:[PORT]/api
+```
+
+---
+
+</br>
+</br>
 
 ## Redis
 
-1. 보안을 위한 access token들의 black list
-   - set 이용
-   - AccessTokenStrategy에서 validator에서 확인?
-        - 미들웨어에서할수있는데 넘어와야한다.
-        - jwt-access에서만 확인가능해서 좋음 
-   - 또는 미들웨어에서확인
-        - 제일앞에서 확인가능함
-        - 분기가 너무많음
-2. look aside cache - food API (파레토의 법칙)
-   - key value 이용
+### 1. 두개의 인스턴스를 이용
 
-데이터하나에 두개의 인스턴스를 사용
+- 하나의 인스턴스, 두개의 데이터베이스는 효율이 떨어짐
+
+### 2. 자료구조
+
+- 보안을 위한 access token들의 black list
+  - key value 자료구조
+- look aside cache - food API (파레토의 법칙)
+  - hash 자료구조
+
+---

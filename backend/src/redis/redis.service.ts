@@ -25,7 +25,7 @@ export class RedisService {
   ) {}
 
   /**
-   *
+   * Check if the access token is in the Redis blacklist, and if it's not, add it to the Redis blacklist.
    * 1. Receives an access token as an argument and checks if it is on the blacklist.
    * 2. After new access token is issued, the previous access token is registered on the blacklist.
    * 3. The time at which the access token is stored in Redis is calculated based on the token using getRemainingSecondsForTokenExpiry.
@@ -52,7 +52,7 @@ export class RedisService {
         );
       }
     } catch (error) {
-      throw new UnauthorizedException(error.message);
+      throw new UnauthorizedException(error);
     }
   }
 
@@ -68,14 +68,14 @@ export class RedisService {
         throw new UnauthorizedException(ACCESS_TOKEN_PAYLOAD_ERROR);
       return payload["exp"] - Math.floor(Date.now() / 1000);
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new UnauthorizedException(error);
     }
   }
 
   /**
    * Checks if the access token is registered on the blacklist
    * @param accessToken Access token
-   * @returns retuns 1 if access token is blacklisted
+   * @returns value of key-value : ""
    */
   async isTokenBlacklisted(accessToken: string) {
     try {

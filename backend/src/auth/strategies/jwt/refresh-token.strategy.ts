@@ -23,7 +23,7 @@ import {
  * @param request request
  * @returns refresh token
  */
-function refreshJwtFromReq(request: Request) {
+export function refreshJwtFromReq(request: Request) {
   if (request && request.headers && request.headers["cookie"])
     return request.headers["cookie"]
       ?.split(";")
