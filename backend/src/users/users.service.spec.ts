@@ -2,8 +2,16 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { Users } from "./entities/user.entity";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { UsersService } from "./users.service";
-import { MockTypeRepository } from "src/common/test/unit-test.interface";
+import {
+  MockTypeRepository,
+  createUserInput,
+  createUserOutput,
+  userFromDB,
+} from "src/common/test/unit-test.interface";
 import { MockRepository } from "src/common/test/unit-test.mock";
+import { InternalServerErrorException } from "@nestjs/common";
+import { USER_CONFLICT_RESPONSE } from "./constants/user.constants";
+import { CreateUserOutput } from "./dtos/create-user.dto";
 
 describe("UsersService", () => {
   let usersService: UsersService;
@@ -30,30 +38,73 @@ describe("UsersService", () => {
   });
 
   describe("createUser", () => {
-    it("should throw ConflictException when the email already exists", async () => {});
-    it("유저 저장에 실패했기때문에 서버에러가 떠야함", async () => {});
-    it("유저를 성공적으로 저장", async () => {});
+    it("should throw ConflictException when the email already exists", async () => {
+      jest.spyOn(usersService, "checkEmailExists").mockResolvedValueOnce(true);
+
+      await expect(
+        usersService.createUser(createUserInput)
+      ).rejects.toThrowError(USER_CONFLICT_RESPONSE);
+
+      expect(usersService.checkEmailExists).toBeCalledTimes(1);
+      expect(usersService.checkEmailExists).toBeCalledWith(
+        createUserInput.email
+      );
+    });
+
+    it("should throw an InternalServerErrorException when user save fails in DB", async () => {
+      jest.spyOn(usersService, "checkEmailExists").mockResolvedValueOnce(false);
+      usersRepository.create.mockReturnValueOnce(createUserInput);
+      usersRepository.save.mockRejectedValueOnce(new Error());
+
+      await expect(
+        usersService.createUser(createUserInput)
+      ).rejects.toThrowError(new InternalServerErrorException(new Error()));
+
+      expect(usersService.checkEmailExists).toBeCalledTimes(1);
+      expect(usersService.checkEmailExists).toBeCalledWith(
+        createUserInput.email
+      );
+      expect(usersRepository.create).toBeCalledTimes(1);
+      expect(usersRepository.create).toBeCalledWith(createUserInput);
+      expect(usersRepository.save).toBeCalledTimes(1);
+      expect(usersRepository.save).toBeCalledWith(createUserInput);
+    });
+
+    it("should create user and return createUserOutput", async () => {
+      jest.spyOn(usersService, "checkEmailExists").mockResolvedValueOnce(false);
+      usersRepository.create.mockReturnValueOnce(createUserInput);
+      usersRepository.save.mockResolvedValueOnce(userFromDB);
+
+      const result = await usersService.createUser(createUserInput);
+
+      expect(result).toEqual(createUserOutput);
+
+      expect(usersRepository.create).toBeCalledTimes(1);
+      expect(usersRepository.create).toBeCalledWith(createUserInput);
+      expect(usersRepository.save).toBeCalledTimes(1);
+      expect(usersRepository.save).toBeCalledWith(createUserInput);
+    });
   });
 
   describe("updateUser", () => {
-    it("해당유저아이디로부터 유저정보를 얻지못함", async () => {});
-    it("should throw ConflictException when the email already exists", async () => {});
-    it("유저를 성공적으로 실패, 서버에러출력", async () => {});
-    it("유저를 성공적으로 업데이트", async () => {});
+    it.todo("should failed to obtain user information from the given user ID");
+    it.todo("should throw a ConflictException when the email already exists");
+    it.todo("should failed to update the user, server error output");
+    it.todo("should successfully updated the user");
   });
 
   describe("getReturnValue", () => {
-    it("유저정보가 있기때문에 성공 출력", async () => {});
-    it("유저정보가 없기때문에 실패 출력", async () => {});
+    it.todo("should success output as there is user information");
+    it.todo("should failed output as there is no user information");
   });
 
   describe("checkEmailExists", () => {
-    it("유저정보 불러오기 실패, 서버에러", async () => {});
-    it("유저정보를 성공적으로 불러옴", async () => {});
+    it.todo("should failed to load user information, server error");
+    it.todo("should successfully loaded user information");
   });
 
   describe("findUserById", () => {
-    it("유저정보 불러오기 실패, 서버에러", async () => {});
-    it("유저정보를 성공적으로 불러옴", async () => {});
+    it.todo("should failed to load user information, server error");
+    it.todo("should successfully loaded user information");
   });
 });
