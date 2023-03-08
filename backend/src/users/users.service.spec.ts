@@ -6,11 +6,10 @@ import {
   MockTypeRepository,
   createUserInput,
   createUserOutput,
-  updateUserInput,
   userFromDB,
 } from "src/common/test/unit-test.interface";
 import { MockRepository } from "src/common/test/unit-test.mock";
-import { InternalServerErrorException } from "@nestjs/common";
+import { HttpStatus, InternalServerErrorException } from "@nestjs/common";
 import { USER_CONFLICT_RESPONSE } from "./constants/user.constants";
 
 describe("UsersService", () => {
@@ -88,23 +87,92 @@ describe("UsersService", () => {
 
   describe("updateUser", () => {
     it("should failed to obtain user information from the given user ID", async () => {
-      jest.spyOn(usersService, "findUserById").mockRejectedValue(undefined);
+      jest.spyOn(usersService, "findUserById").mockResolvedValue(undefined);
 
       await expect(
-        usersService.updateUser(expect.any(Number), updateUserInput)
+        usersService.updateUser(expect.any(Number), { email: "test@email.com" })
       ).rejects.toThrowError();
 
       expect(usersService.findUserById).toBeCalledTimes(1);
       expect(usersService.findUserById).toBeCalledWith(expect.any(Number));
     });
 
-    it("should throw a ConflictException when the email already exists", async () => {
+    it("should throw a ConflictException when the email already exists and not same email as user", async () => {
+      const updateUserInput = {
+        email: "test@email.com",
+        password: "12345",
+      };
+      const updateUserOutput = {
+        success: true,
+        code: HttpStatus.CONFLICT,
+        error: { message: USER_CONFLICT_RESPONSE },
+      };
+
       jest
         .spyOn(usersService, "findUserById")
-        .mockResolvedValueOnce(userFromDB);
+        .mockResolvedValueOnce(userFromDB as Users);
+      jest.spyOn(usersService, "checkEmailExists").mockResolvedValue(true);
+      jest
+        .spyOn(usersService, "getReturnValue")
+        .mockReturnValue(updateUserOutput);
+
+      const result = await usersService.updateUser(
+        expect.any(Number),
+        updateUserInput
+      );
+      expect(result).toEqual(updateUserOutput);
+
+      expect(usersService.findUserById).toBeCalledTimes(1);
+      expect(usersService.findUserById).toBeCalledWith(expect.any(Number));
+      expect(usersService.checkEmailExists).toBeCalledTimes(1);
+      expect(usersService.checkEmailExists).toBeCalledWith(
+        updateUserInput.email
+      );
+      expect(usersService.getReturnValue).toBeCalledTimes(1);
+      expect(usersService.getReturnValue).toBeCalledWith();
     });
-    it("should failed to update the user, server error output", async () => {});
-    it("should successfully updated the user", async () => {});
+
+    it("should update user if email exist but it is the same email as user", async () => {
+      const updateUserInput = {
+        email: `${userFromDB.email}`,
+        password: "12345",
+      };
+      const userForRespository: typeof userFromDB = {
+        ...userFromDB,
+        ...updateUserInput,
+      };
+      const { password, refreshToken, ...updatedUser } = userForRespository;
+      const updateUserOutput = {
+        success: true,
+        code: HttpStatus.OK,
+        data: { user: updatedUser },
+      };
+
+      jest
+        .spyOn(usersService, "findUserById")
+        .mockResolvedValueOnce(userFromDB as Users);
+      jest.spyOn(usersService, "checkEmailExists").mockResolvedValue(true);
+      usersRepository.create.mockReturnValueOnce(userForRespository);
+      usersRepository.save.mockResolvedValueOnce(userForRespository);
+      jest
+        .spyOn(usersService, "getReturnValue")
+        .mockReturnValue(updateUserOutput);
+
+      const result = await usersService.updateUser(
+        expect.any(Number),
+        updateUserInput
+      );
+      expect(result).toEqual(updateUserOutput);
+
+      expect(usersService.findUserById).toBeCalledTimes(1);
+      expect(usersService.findUserById).toBeCalledWith(expect.any(Number));
+      expect(usersService.checkEmailExists).toBeCalledTimes(1);
+      expect(usersService.checkEmailExists).toBeCalledWith(
+        updateUserInput.email
+      );
+      expect(usersService.getReturnValue).toBeCalledTimes(1);
+      expect(usersService.getReturnValue).toBeCalledWith(updatedUser);
+    });
   });
 
   describe("getReturnValue", () => {

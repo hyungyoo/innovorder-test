@@ -76,16 +76,14 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException(USER_NOT_FOUND_RESPONSE);
       }
-
       if (updateUserInput.email) {
         const isEmailExists = await this.checkEmailExists(
           updateUserInput.email
         );
-        if (isEmailExists && user.email === updateUserInput.email) {
+        if (isEmailExists && user.email !== updateUserInput.email) {
           return this.getReturnValue();
         }
       }
-
       const { password, refreshToken, ...updatedUser } =
         await this.usersRepository.save(
           this.usersRepository.create({ ...user, ...updateUserInput })

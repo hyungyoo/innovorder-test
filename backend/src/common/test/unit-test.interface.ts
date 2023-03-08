@@ -1,9 +1,14 @@
+import { HttpStatus } from "@nestjs/common";
 import { OmitType } from "@nestjs/mapped-types";
+import { USER_CONFLICT_RESPONSE } from "src/users/constants/user.constants";
 import {
   CreateUserInput,
   CreateUserOutput,
 } from "src/users/dtos/create-user.dto";
-import { UpdateUserInput } from "src/users/dtos/update-user.dto";
+import {
+  UpdateUserInput,
+  UpdateUserOutput,
+} from "src/users/dtos/update-user.dto";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 
@@ -33,11 +38,20 @@ export const createUserOutput: CreateUserOutput = {
   },
 };
 
-export const updateUserInput: UpdateUserInput = {
-  email: "changed@gmail.com",
+export const updateUserOutputSucces: UpdateUserOutput = {
+  success: true,
+  code: 201,
+  data: {
+    user: {
+      id: 1,
+      email: "changed@gmail.com",
+      firstName: "hyungjun",
+      lastName: "yoo",
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    },
+  },
 };
-
-export class UserFromDB extends Users {}
 
 export const userFromDB = {
   id: expect.any(Number),
