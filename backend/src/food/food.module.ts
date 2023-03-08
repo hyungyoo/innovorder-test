@@ -2,6 +2,8 @@ import { Module } from "@nestjs/common";
 import { FoodService } from "./food.service";
 import { FoodController } from "./food.controller";
 import { HttpModule } from "@nestjs/axios";
+import { RedisService } from "src/redis/redis.service";
+import { JwtService } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -10,7 +12,7 @@ import { HttpModule } from "@nestjs/axios";
       maxRedirects: +process.env.HTTP_MAX_REDIRECTS || 5,
     }),
   ],
-  providers: [FoodService],
+  providers: [FoodService, RedisService, JwtService],
   controllers: [FoodController],
 })
 export class FoodModule {}

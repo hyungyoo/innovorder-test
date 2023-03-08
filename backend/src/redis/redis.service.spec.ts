@@ -1,18 +1,58 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { RedisService } from './redis.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { RedisService } from "./redis.service";
 
-describe('RedisService', () => {
-  let service: RedisService;
+const MockJwtService = () => ({
+  decode: jest.fn(),
+});
+
+const MockRedisBlacklist = () => ({
+  set: jest.fn(),
+  expireat: jest.fn(),
+  get: jest.fn(),
+});
+
+const MockRedisClient = () => ({
+  hset: jest.fn(),
+  expireat: jest.fn(),
+  hget: jest.fn(),
+});
+
+const MockConfigService = () => ({
+  get: jest.fn(),
+});
+
+describe("RedisService", () => {
+  let redisService: RedisService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RedisService],
+      providers: [
+        RedisService,
+        {
+          provide: JwtService,
+          useValue: MockJwtService(),
+        },
+        {
+          provide: "REDIS_BLACKLIST_INSTANCE",
+          useValue: MockRedisBlacklist(),
+        },
+        {
+          provide: "REDIS_CACHE_INSTANCE",
+          useValue: MockRedisClient(),
+        },
+        {
+          provide: ConfigService,
+          useValue: MockConfigService(),
+        },
+      ],
     }).compile();
 
-    service = module.get<RedisService>(RedisService);
+    redisService = module.get<RedisService>(RedisService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it("should be defined", () => {
+    expect(redisService).toBeDefined();
   });
 });
