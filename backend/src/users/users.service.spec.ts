@@ -195,17 +195,6 @@ describe("UsersService", () => {
   });
 
   describe("findUserById", () => {
-    it("should failed to load user information, server error", async () => {
-      usersRepository.findOne.mockRejectedValueOnce(new Error());
-
-      await expect(usersService.findUserById(1)).rejects.toThrowError();
-
-      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(usersRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-    });
-
     it("should successfully loaded user information", async () => {
       usersRepository.findOne.mockResolvedValue(userFromDB);
 

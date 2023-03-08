@@ -135,10 +135,6 @@ export class UsersService {
    * @returns Users or null
    */
   findUserById(id: number) {
-    try {
-      return this.usersRepository.findOne({ where: { id } });
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    return this.usersRepository.findOne({ where: { id } });
   }
 }
