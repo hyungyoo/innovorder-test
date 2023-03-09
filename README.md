@@ -2,7 +2,19 @@
 
 </br>
 
-## Env file 설정 : .env.dev
+## Configuration file setup :
+
+</br>
+
+#### File name
+
+```
+innovorder-test/.env.dev
+```
+
+</br>
+
+#### Configuration example
 
 ```env
 ## postgres
@@ -10,7 +22,7 @@ POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
 POSTGRES_PASSWORD=postgres
 POSTGRES_USERNAME=postgres
-POSTGRES_DB=user
+POSTGRES_DB=innovorder
 
 ## backend (not required)
 APP_PORT=8080
@@ -45,21 +57,37 @@ FOOD_API_EXTENSION=json
 </br>
 </br>
 
-## Docker
-
-- docker compose
+## Start
 
 </br>
+
+### Command
+
+```
+$> make
+```
+
 </br>
 
----
+### Result
 
-## Makefile
-
-- make
-  ```
-  docker-compose --env-file [file_path] up --build
-  ```
+```
+$> docker-compose --env-file .env.dev up --build
+$> Creating network "innovorder-test_innovorder_network" with driver "bridge"
+$> Creating volume "innovorder-test_postgres_db" with default driver
+$> Pulling postgres (postgres:)...
+$> latest: Pulling from library/postgres
+$> 3f9582a2cbe7: Already exists
+$> 0d9d08fc1a1a: Pull complete
+$> ecae4ccb4d1b: Pull complete
+...
+...
+...
+$> backend     | [Nest] 38  - 03/09/2023, 3:33:49 PM     LOG [RoutesResolver] FoodController {/api/v1.0/food}: +0ms
+$> backend     | [Nest] 38  - 03/09/2023, 3:33:49 PM     LOG [RouterExplorer] Mapped {/api/v1.0/food/:barcode, GET} route +1ms
+$> backend     | [Nest] 38  - 03/09/2023, 3:33:49 PM     LOG [NestApplication] Nest application successfully started +8ms
+$> backend     | [Nest] 38  - 03/09/2023, 3:33:49 PM VERBOSE [ServerListening] Api Server : [http://localhost:8080]
+```
 
 ---
 
@@ -68,7 +96,11 @@ FOOD_API_EXTENSION=json
 </br>
 </br>
 
-## API swagger
+## Swagger
+
+</br>
+
+### Swagger url
 
 ```
 localhost:[PORT]/api
@@ -79,17 +111,61 @@ localhost:[PORT]/api
 </br>
 </br>
 
-## Redis
+## Unit test
 
-### 1. 두개의 인스턴스를 이용
+</br>
 
-- 하나의 인스턴스, 두개의 데이터베이스는 효율이 떨어짐
+### Command
 
-### 2. 자료구조
+```
+$> dokcer exec -it backend bash
+root@.../app# npm run test:cov
+```
 
-- 보안을 위한 access token들의 black list
-  - key value 자료구조
-- look aside cache - food API (파레토의 법칙)
-  - hash 자료구조
+### or
+
+```
+$> docker exec -it backend sh -c "npm run test:cov"
+```
+
+</br>
+
+### Result
+
+```
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------|---------|----------|---------|---------|-------------------
+All files          |     100 |      100 |     100 |     100 |
+ auth              |     100 |      100 |     100 |     100 |
+  auth.service.ts  |     100 |      100 |     100 |     100 |
+ food              |     100 |      100 |     100 |     100 |
+  food.service.ts  |     100 |      100 |     100 |     100 |
+ redis             |     100 |      100 |     100 |     100 |
+  redis.service.ts |     100 |      100 |     100 |     100 |
+ users             |     100 |      100 |     100 |     100 |
+  users.service.ts |     100 |      100 |     100 |     100 |
+-------------------|---------|----------|---------|---------|-------------------
+```
 
 ---
+
+</br>
+</br>
+
+## e2e test
+
+### Command
+
+```
+$> dokcer exec -it backend bash
+root@.../app# npm run test:e2e
+```
+
+### or
+
+```
+$> docker exec -it backend sh -c "npm run test:e2e"
+```
+
+### Result
