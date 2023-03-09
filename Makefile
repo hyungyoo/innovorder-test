@@ -46,3 +46,9 @@ backend-test-cov :
 .PHONY: backend-test-e2e
 backend-test-e2e :
 	docker exec -it backend sh -c "npm run test:e2e"
+
+
+.PHONY: postgres
+postgres :
+	docker exec -it postgres sh -c "psql -U postgres -d innovorder"
+
