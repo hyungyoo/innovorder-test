@@ -7,7 +7,7 @@ import {
   MockConfigService,
   MockHttpservice,
   MockRedisService,
-} from "src/common/test/unit-test.mock";
+} from "test/interface/unit-test.mock";
 import {
   barcode,
   foodData,
@@ -16,7 +16,7 @@ import {
   openFoodApiDto,
   openfoodApiFailOutput,
   openfoodApiOutput,
-} from "src/common/test/unit-test.interface";
+} from "test/interface/unit-test.interface";
 import { InternalServerErrorException } from "@nestjs/common";
 
 describe("FoodService", () => {
