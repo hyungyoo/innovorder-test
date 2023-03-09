@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { firstValueFrom } from "rxjs";
 import { RedisService } from "src/redis/redis.service";
 import { OpenFoodApiOutput } from "./dtos/food.dto";
 import { FoodOutput } from "./dtos/find.food.dto";
@@ -72,9 +71,10 @@ export class FoodService {
     try {
       const url = this.configService.get("FOOD_API_URL");
       const extention = this.configService.get("FOOD_API_EXTENTSION");
-      const openFoodFactsDto: OpenFoodApiOutput = await firstValueFrom(
-        this.httpService.get(`${url}/${barcode}/${extention}`).pipe()
-      ).then((res) => res.data);
+      const openFoodFactsDto: OpenFoodApiOutput =
+        await this.httpService.axiosRef
+          .get(`${url}/${barcode}/${extention}`)
+          .then((res) => res.data);
       return openFoodFactsDto;
     } catch (error) {
       throw new InternalServerErrorException(error);

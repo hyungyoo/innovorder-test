@@ -179,7 +179,7 @@ export class AuthService {
       }
       return null;
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new UnauthorizedException(error);
     }
   }
 }
