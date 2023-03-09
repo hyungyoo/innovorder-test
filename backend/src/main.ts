@@ -21,6 +21,19 @@ async function bootstrap() {
     .setTitle("Innovorder test")
     .setDescription("innovorder test with CRUD")
     .setVersion(process.env.API_VERSION)
+    .addCookieAuth("refresh_token", {
+      name: "Refresh token",
+      description: "Entre refresh token",
+      type: "http",
+      scheme: "bearer",
+    })
+    .addBearerAuth({
+      type: "http",
+      scheme: "bearer",
+      name: "Access token",
+      description: "Enter access token",
+      in: "header",
+    })
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);

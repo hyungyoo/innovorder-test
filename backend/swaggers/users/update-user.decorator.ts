@@ -1,6 +1,7 @@
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
+  ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,

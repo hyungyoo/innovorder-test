@@ -9,6 +9,7 @@ import { ApiTags } from "@nestjs/swagger";
 import { FoodService } from "./food.service";
 import { AccessTokenGuard } from "src/auth/guards/jwt-access.guard";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
+import { CustomFood } from "swaggers/food/food.decorator";
 
 @ApiTags("Food")
 @Controller(`api/v${process.env.API_VERSION}/food`)
@@ -22,6 +23,7 @@ export class FoodController {
    * @param barcode
    * @returns header (access token), body (food info)
    */
+  @CustomFood()
   @UseGuards(AccessTokenGuard)
   @UseInterceptors(JwtHeaderInterceptor)
   @Get(":barcode")

@@ -24,10 +24,10 @@ import { FoodModule } from "./food/food.module";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: "../.env.test",
-      // process.env.NODE_ENV === "dev"
-      //   ? path.join(__dirname, `.env.${process.env.NODE_ENV}`)
-      //   : "../env.test",
+      envFilePath:
+        process.env.NODE_ENV === "dev"
+          ? path.join(__dirname, `.env.${process.env.NODE_ENV}`)
+          : "../env.test",
       ignoreEnvFile: false,
       validationSchema: joi.object({
         POSTGRES_HOST: joi.string().required(),

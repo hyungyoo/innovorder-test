@@ -14,6 +14,9 @@ import { LoginInput } from "./dtos/login.dto";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
 import { AccessTokenGuard } from "./guards/jwt-access.guard";
 import { RefreshTokenGuard } from "./guards/jwt-refresh.guard";
+import { CustomLogin } from "swaggers/auth/login.decorator";
+import { CustomRefresh } from "swaggers/auth/refresh.decorator";
+import { CustomLogout } from "swaggers/auth/logout.decorator";
 
 @ApiTags("Auth")
 @Controller(`api/v${process.env.API_VERSION}/auth`)
@@ -29,6 +32,7 @@ export class AuthController {
    * @param user user
    * @returns header (refresh token, access token), body (user)
    */
+  @CustomLogin()
   @UseGuards(LocalGuard)
   @UseInterceptors(JwtHeaderInterceptor)
   @Post("login")
@@ -45,6 +49,7 @@ export class AuthController {
    * @param user user
    * @returns  success (boolean), code (number)
    */
+  @CustomLogout()
   @UseGuards(AccessTokenGuard)
   @Get("logout")
   logout(@AuthUser() user: UserWithoutPassword) {
@@ -58,6 +63,7 @@ export class AuthController {
    * 3. Before sending response, add refresh and access token to header in the interceptor.
    * @returns header (refresh token, access token)
    */
+  @CustomRefresh()
   @UseGuards(RefreshTokenGuard)
   @UseInterceptors(JwtHeaderInterceptor)
   @Get("refresh")
