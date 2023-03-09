@@ -16,7 +16,6 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot(), // ConfigModule을 추가합니다.
   ],
   providers: [FoodService, RedisService, JwtService],
   controllers: [FoodController],

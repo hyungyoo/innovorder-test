@@ -13,6 +13,7 @@ import {
   foodData,
   foodFailOutput,
   foodSuccessOutput,
+  openFoodApiDto,
   openfoodApiFailOutput,
   openfoodApiOutput,
 } from "src/common/test/unit-test.interface";
@@ -119,10 +120,31 @@ describe("FoodService", () => {
   });
 
   describe("getFoodDataFromApi", () => {
-    it("axios get실패시 에러발생", async () => {
-      // jest.spyOn(httpService, "get").mockImplementationOnce(()={});
+    it("should fail if axios call returns server error", async () => {
+      jest
+        .spyOn(httpService.axiosRef, "get")
+        .mockRejectedValueOnce(new Error());
+
+      await expect(
+        foodService.getFoodDataFromApi(barcode)
+      ).rejects.toThrowError();
+
+      expect(httpService.axiosRef.get).toBeCalledTimes(1);
+      expect(httpService.axiosRef.get).toBeCalledWith(expect.any(String));
+      expect(configService.get).toBeCalledTimes(2);
     });
 
-    it("axios get실패시 에러발생", async () => {});
+    it("should return data using Axios", async () => {
+      jest
+        .spyOn(httpService.axiosRef, "get")
+        .mockResolvedValueOnce(openFoodApiDto);
+
+      const result = await foodService.getFoodDataFromApi(barcode);
+      expect(result).toMatchObject(openfoodApiOutput);
+
+      expect(httpService.axiosRef.get).toBeCalledTimes(1);
+      expect(httpService.axiosRef.get).toBeCalledWith(expect.any(String));
+      expect(configService.get).toBeCalledTimes(2);
+    });
   });
 });

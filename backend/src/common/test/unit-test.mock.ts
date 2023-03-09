@@ -43,9 +43,11 @@ export const MockConfigService = () => ({
 });
 
 export const MockHttpservice = () => ({
-  get: jest.fn((query: string) => {
-    return expect.any(Object);
-  }),
+  axiosRef: {
+    get: jest.fn((query: string) => {
+      return expect.any(Object);
+    }),
+  },
 });
 
 export const MockRedisService = () => ({

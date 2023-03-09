@@ -123,6 +123,10 @@ export const openfoodApiOutput: OpenFoodApiOutput = {
   status: foodSuccessOutput.code,
 };
 
+export const openFoodApiDto = {
+  data: openfoodApiOutput,
+};
+
 export const openfoodApiFailOutput: OpenFoodApiOutput = {
   product: undefined,
   status_verbose: foodFailOutput.error.message,
