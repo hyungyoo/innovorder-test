@@ -13,8 +13,8 @@ import {
   updatedUser,
   userForRespository,
   userFromDB,
-} from "src/common/test/unit-test.interface";
-import { MockRepository } from "src/common/test/unit-test.mock";
+} from "test/interface/unit-test.interface";
+import { MockRepository } from "test/interface/unit-test.mock";
 import { InternalServerErrorException } from "@nestjs/common";
 import { USER_CONFLICT_RESPONSE } from "./constants/user.constants";
 

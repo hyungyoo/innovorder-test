@@ -7,14 +7,14 @@ import {
   MockJwtService,
   MockRedisBlacklist,
   MockRedisClient,
-} from "src/common/test/unit-test.mock";
+} from "test/interface/unit-test.mock";
 import {
   MockRedisType,
   accessToken,
   accessTokenWithoutExp,
   barcode,
   serializedData,
-} from "src/common/test/unit-test.interface";
+} from "test/interface/unit-test.interface";
 import {
   ACCESS_TOKEN_BLACKLISTED,
   ACCESS_TOKEN_EXPIRED,

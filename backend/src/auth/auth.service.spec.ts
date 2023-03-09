@@ -8,7 +8,7 @@ import {
   MockConfigService,
   MockJwtService,
   MockRepository,
-} from "src/common/test/unit-test.mock";
+} from "test/interface/unit-test.mock";
 import {
   MockTypeRepository,
   accessToken,
@@ -22,7 +22,7 @@ import {
   userLoingOutput,
   userRefreshOutput,
   validateUserInput,
-} from "src/common/test/unit-test.interface";
+} from "test/interface/unit-test.interface";
 import { InternalServerErrorException } from "@nestjs/common";
 import * as bcrypt from "bcryptjs";
 
