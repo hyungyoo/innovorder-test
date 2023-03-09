@@ -30,8 +30,8 @@ export class FoodService {
    */
   async findFoodByBarcode(barcode: string): Promise<FoodOutput> {
     try {
-      const isCachedData = await this.redisService.getCachedFoodData(barcode);
-      if (isCachedData) return this.getReturnValue(isCachedData);
+      const cachedData = await this.redisService.getCachedFoodData(barcode);
+      if (cachedData) return this.getReturnValue(cachedData);
 
       const openFoodApiOutput: OpenFoodApiOutput =
         await this.getFoodDataFromApi(barcode);
@@ -47,7 +47,7 @@ export class FoodService {
    * @param data OpenFoodApiOut
    * @returns
    */
-  async getReturnValue(data: OpenFoodApiOutput) {
+  getReturnValue(data: OpenFoodApiOutput) {
     if (data.product) {
       return {
         success: true,

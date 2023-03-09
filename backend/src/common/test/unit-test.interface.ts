@@ -6,6 +6,7 @@ import {
 } from "src/users/dtos/create-user.dto";
 import { Repository } from "typeorm";
 import * as redis from "redis";
+import { OpenFoodApiOutput } from "src/food/dtos/food.dto";
 
 export type MockTypeRepository<T> = Partial<
   Record<keyof Repository<T>, jest.Mock>
@@ -97,3 +98,34 @@ export const barcode = "1234";
 export const dataForSerialize = { a: "a" };
 
 export const serializedData = JSON.stringify(dataForSerialize);
+
+export const foodData = {
+  product: expect.any(Object),
+  status_verbose: "verbose",
+};
+
+export const foodSuccessOutput = {
+  success: true,
+  code: HttpStatus.OK,
+  data: { product: foodData.product },
+};
+
+export const foodFailOutput = {
+  success: false,
+  code: HttpStatus.NOT_FOUND,
+  error: { message: foodData.status_verbose },
+};
+
+export const openfoodApiOutput: OpenFoodApiOutput = {
+  product: expect.any(Object),
+  status_verbose: foodFailOutput.error.message,
+  code: "code",
+  status: foodSuccessOutput.code,
+};
+
+export const openfoodApiFailOutput: OpenFoodApiOutput = {
+  product: undefined,
+  status_verbose: foodFailOutput.error.message,
+  code: "code",
+  status: foodSuccessOutput.code,
+};

@@ -1,4 +1,5 @@
 import {
+  foodData,
   payloadWithExp,
   payloadWithoutExp,
   serializedData,
@@ -48,6 +49,8 @@ export const MockHttpservice = () => ({
 });
 
 export const MockRedisService = () => ({
-  getCachedFoodData: jest.fn(),
+  getCachedFoodData: jest.fn((barcode: string) => {
+    return foodData;
+  }),
   addToCacheFoodData: jest.fn(),
 });

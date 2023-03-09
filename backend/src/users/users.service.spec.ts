@@ -54,6 +54,8 @@ describe("UsersService", () => {
       expect(usersService.checkEmailExists).toBeCalledWith(
         createUserInput.email
       );
+      expect(usersRepository.create).toBeCalledTimes(0);
+      expect(usersRepository.save).toBeCalledTimes(0);
     });
 
     it("should throw an InternalServerErrorException when user save fails in DB", async () => {
@@ -94,6 +96,7 @@ describe("UsersService", () => {
   describe("updateUser", () => {
     it("should failed to obtain user information from the given user ID", async () => {
       jest.spyOn(usersService, "findUserById").mockResolvedValue(undefined);
+      jest.spyOn(usersService, "checkEmailExists").mockResolvedValue(false);
 
       await expect(
         usersService.updateUser(expect.any(Number), { email: "test@email.com" })
@@ -101,6 +104,9 @@ describe("UsersService", () => {
 
       expect(usersService.findUserById).toBeCalledTimes(1);
       expect(usersService.findUserById).toBeCalledWith(expect.any(Number));
+      expect(usersService.checkEmailExists).toBeCalledTimes(0);
+      expect(usersRepository.create).toBeCalledTimes(0);
+      expect(usersRepository.save).toBeCalledTimes(0);
     });
 
     it("should throw a ConflictException when the email already exists and not same email as user", async () => {
@@ -126,6 +132,8 @@ describe("UsersService", () => {
       );
       expect(usersService.getReturnValue).toBeCalledTimes(1);
       expect(usersService.getReturnValue).toBeCalledWith();
+      expect(usersRepository.create).toBeCalledTimes(0);
+      expect(usersRepository.save).toBeCalledTimes(0);
     });
 
     it("should update user if email exist but it is the same email as user", async () => {

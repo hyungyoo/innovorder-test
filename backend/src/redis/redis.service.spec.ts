@@ -70,6 +70,9 @@ describe("RedisService", () => {
   describe("addToBlacklist", () => {
     it("should fail when an access token is registered on the blacklist", async () => {
       blacklistClient.get.mockResolvedValueOnce(ACCESS_TOKEN_VALUE);
+      jest
+        .spyOn(redisService, "getRemainingSecondsForTokenExpiry")
+        .mockReturnValue(300);
 
       await expect(
         redisService.addToBlacklist(accessToken)
@@ -77,6 +80,7 @@ describe("RedisService", () => {
 
       expect(blacklistClient.get).toBeCalledTimes(1);
       expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
+      expect(redisService.getRemainingSecondsForTokenExpiry).toBeCalledTimes(0);
     });
 
     it("should fail if there is no remaining time for the token", async () => {
@@ -91,6 +95,7 @@ describe("RedisService", () => {
 
       expect(blacklistClient.get).toBeCalledTimes(1);
       expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
+      expect(redisService.getRemainingSecondsForTokenExpiry).toBeCalledTimes(1);
     });
 
     it("should successfully save the access token to the blacklist if it is not already stored in the blacklist", async () => {
@@ -104,6 +109,10 @@ describe("RedisService", () => {
 
       expect(blacklistClient.get).toBeCalledTimes(1);
       expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
+      expect(redisService.getRemainingSecondsForTokenExpiry).toBeCalledTimes(1);
+      expect(redisService.getRemainingSecondsForTokenExpiry).toBeCalledWith(
+        accessToken
+      );
     });
   });
 

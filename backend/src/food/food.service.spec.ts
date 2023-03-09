@@ -8,6 +8,15 @@ import {
   MockHttpservice,
   MockRedisService,
 } from "src/common/test/unit-test.mock";
+import {
+  barcode,
+  foodData,
+  foodFailOutput,
+  foodSuccessOutput,
+  openfoodApiFailOutput,
+  openfoodApiOutput,
+} from "src/common/test/unit-test.interface";
+import { InternalServerErrorException } from "@nestjs/common";
 
 describe("FoodService", () => {
   let foodService: FoodService;
@@ -42,5 +51,76 @@ describe("FoodService", () => {
 
   it("should be defined", () => {
     expect(foodService).toBeDefined();
+    expect(configService).toBeDefined();
+    expect(httpService).toBeDefined();
+    expect(redisService).toBeDefined();
+  });
+
+  describe("findFoodByBarcode", () => {
+    it("should return an error if there is an error", async () => {
+      jest
+        .spyOn(redisService, "getCachedFoodData")
+        .mockRejectedValueOnce(new Error());
+
+      await expect(foodService.findFoodByBarcode(barcode)).rejects.toThrowError(
+        InternalServerErrorException
+      );
+
+      expect(redisService.getCachedFoodData).toBeCalledTimes(1);
+      expect(redisService.getCachedFoodData).toBeCalledWith(barcode);
+    });
+
+    it("should return data if there is an data in redis cache", async () => {
+      jest
+        .spyOn(redisService, "getCachedFoodData")
+        .mockResolvedValueOnce(foodData);
+      jest.spyOn(redisService, "addToCacheFoodData").mockResolvedValueOnce();
+
+      const result = await foodService.findFoodByBarcode(barcode);
+      expect(result).toStrictEqual(foodSuccessOutput);
+
+      expect(redisService.getCachedFoodData).toBeCalledTimes(1);
+      expect(redisService.getCachedFoodData).toBeCalledWith(barcode);
+      expect(redisService.addToCacheFoodData).toBeCalledTimes(0);
+    });
+
+    it("should reuturn data form API request if there is no data in the Redis cache", async () => {
+      jest
+        .spyOn(redisService, "getCachedFoodData")
+        .mockResolvedValueOnce(undefined);
+      jest.spyOn(redisService, "addToCacheFoodData").mockResolvedValueOnce();
+      jest
+        .spyOn(foodService, "getFoodDataFromApi")
+        .mockResolvedValueOnce(openfoodApiOutput);
+
+      const result = await foodService.findFoodByBarcode(barcode);
+      expect(result).toStrictEqual(foodSuccessOutput);
+
+      expect(redisService.getCachedFoodData).toBeCalledTimes(1);
+      expect(redisService.getCachedFoodData).toBeCalledWith(barcode);
+      expect(redisService.addToCacheFoodData).toBeCalledTimes(1);
+      expect(redisService.addToCacheFoodData).toBeCalledWith(
+        barcode,
+        openfoodApiOutput
+      );
+    });
+  });
+
+  describe("getReturnValue", () => {
+    it("should return a successful response when product is available", () => {
+      const result = foodService.getReturnValue(openfoodApiOutput);
+      expect(result).toEqual(foodSuccessOutput);
+    });
+
+    it("should return fail response when product is not available", () => {
+      const result = foodService.getReturnValue(openfoodApiFailOutput);
+      expect(result).toEqual(foodFailOutput);
+    });
+  });
+
+  describe("getFoodDataFromApi", () => {
+    it("axios get실패시 에러발생", async () => {});
+
+    it("axios get실패시 에러발생", async () => {});
   });
 });
