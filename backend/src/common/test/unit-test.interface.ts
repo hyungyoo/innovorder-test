@@ -7,6 +7,7 @@ import {
 import { Repository } from "typeorm";
 import * as redis from "redis";
 import { OpenFoodApiOutput } from "src/food/dtos/food.dto";
+import * as bcrypt from "bcryptjs";
 
 export type MockTypeRepository<T> = Partial<
   Record<keyof Repository<T>, jest.Mock>
@@ -133,3 +134,43 @@ export const openfoodApiFailOutput: OpenFoodApiOutput = {
   code: "code",
   status: foodSuccessOutput.code,
 };
+
+export const userLoingOutput = (user) => ({
+  success: true,
+  code: HttpStatus.OK,
+  data: { user },
+});
+
+export const userLogoutOutPut = {
+  success: true,
+  code: HttpStatus.NO_CONTENT,
+};
+
+export const userRefreshOutput = {
+  success: true,
+  code: HttpStatus.OK,
+};
+
+export const idAndRefreshToken = {
+  id: userFromDB.id,
+  refreshToken: userFromDB.refreshToken,
+};
+
+export const validateUserInput = (email: string) => ({
+  where: { email },
+  select: [
+    "id",
+    "email",
+    "password",
+    "firstName",
+    "lastName",
+    "createdAt",
+    "updatedAt",
+  ],
+});
+
+export const emailInput = userFromDB.email;
+
+export const failEmail = "fail";
+
+export const passwordInput = "password";

@@ -18,6 +18,7 @@ export const MockJwtService = () => ({
     if (accessToken === "withoutExp") return payloadWithoutExp;
     return payloadWithExp();
   }),
+  signAsync: jest.fn(),
 });
 
 export const MockRedisBlacklist = () => ({

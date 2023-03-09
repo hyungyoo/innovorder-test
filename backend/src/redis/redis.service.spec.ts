@@ -149,6 +149,8 @@ describe("RedisService", () => {
     });
 
     it("should successfuly save food data in redis", async () => {
+      jest.spyOn(configService, "get").mockReturnValueOnce(300);
+
       const result = await redisService.addToCacheFoodData(
         barcode,
         expect.any(Object)
@@ -161,6 +163,8 @@ describe("RedisService", () => {
         barcode,
         expect.any(String)
       );
+      expect(configService.get).toBeCalledTimes(1);
+      expect(configService.get).toBeCalledWith("CACHE_TTL");
       expect(cacheClient.expireat).toBeCalledTimes(1);
       expect(cacheClient.expireat).toBeCalledWith(barcode, expect.any(Number));
     });
