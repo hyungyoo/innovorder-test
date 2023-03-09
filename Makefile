@@ -37,12 +37,12 @@ sclean:
 
 .PHONY: backend-dev
 backend-dev :
-	cd backend && npm run start:dev
+	docker exec -it backend bash
 
 .PHONY: backend-test-cov
 backend-test-cov :
-	cd backend && npm run test:cov
+	docker exec -it backend sh -c "npm run test:cov"
 
 .PHONY: backend-test-e2e
 backend-test-e2e :
-	cd backend && npm run test:e2e
+	docker exec -it backend sh -c "npm run test:e2e"
