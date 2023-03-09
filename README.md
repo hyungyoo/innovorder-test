@@ -91,6 +91,32 @@ $> backend     | [Nest] 38  - 03/09/2023, 3:33:49 PM VERBOSE [ServerListening]
 
 ---
 
+</br>
+</br>
+
+## Postgres
+
+</br>
+
+```
+$>  docker exec -it postgres sh -c "psql -U postgres -d innovorder"
+```
+
+---
+
+</br>
+</br>
+
+## Redis
+
+</br>
+
+```
+$>  docker exec -it redis redis-cli
+```
+
+---
+
 ##
 
 </br>
@@ -169,3 +195,5 @@ $> docker exec -it backend sh -c "npm run test:e2e"
 ```
 
 ### Result
+```
+```
