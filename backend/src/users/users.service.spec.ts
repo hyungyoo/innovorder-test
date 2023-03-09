@@ -15,7 +15,7 @@ import {
   userFromDB,
 } from "src/common/test/unit-test.interface";
 import { MockRepository } from "src/common/test/unit-test.mock";
-import { HttpStatus, InternalServerErrorException } from "@nestjs/common";
+import { InternalServerErrorException } from "@nestjs/common";
 import { USER_CONFLICT_RESPONSE } from "./constants/user.constants";
 
 describe("UsersService", () => {

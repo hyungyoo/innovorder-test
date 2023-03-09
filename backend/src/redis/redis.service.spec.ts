@@ -68,7 +68,7 @@ describe("RedisService", () => {
   });
 
   describe("addToBlacklist", () => {
-    it("접근토큰이 블랙리스트에 등록되어있을경우 실패", async () => {
+    it("should fail when an access token is registered on the blacklist", async () => {
       blacklistClient.get.mockResolvedValueOnce(ACCESS_TOKEN_VALUE);
 
       await expect(
@@ -79,7 +79,7 @@ describe("RedisService", () => {
       expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
     });
 
-    it("토큰에 남아있는시간이 없다면 만료된것이므로 실패", async () => {
+    it("should fail if there is no remaining time for the token", async () => {
       blacklistClient.get.mockResolvedValueOnce(null);
       jest
         .spyOn(redisService, "getRemainingSecondsForTokenExpiry")
@@ -92,7 +92,8 @@ describe("RedisService", () => {
       expect(blacklistClient.get).toBeCalledTimes(1);
       expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
     });
-    it("접근토큰이 블랙리스트에 저장되어있지않다면, 성공적으로 블랙리스트에 접근토큰 저장", async () => {
+
+    it("should successfully save the access token to the blacklist if it is not already stored in the blacklist", async () => {
       blacklistClient.get.mockResolvedValueOnce(null);
       jest
         .spyOn(redisService, "getRemainingSecondsForTokenExpiry")
@@ -107,14 +108,14 @@ describe("RedisService", () => {
   });
 
   describe("getRemainingSecondsForTokenExpiry", () => {
-    it("exp가 없다면 에러", () => {
+    it("should return EXP_NOT_EXISTES if the 'exp' property is missing in access token", () => {
       const result = redisService.getRemainingSecondsForTokenExpiry(
         accessTokenWithoutExp
       );
       expect(result).toBe(EXP_NOT_EXISTS);
     });
 
-    it("있다면 성공", async () => {
+    it("should successfuly return remaining time", async () => {
       const result =
         redisService.getRemainingSecondsForTokenExpiry(accessToken);
       expect(result).toBe(600);
@@ -122,8 +123,9 @@ describe("RedisService", () => {
   });
 
   describe("addToCacheFoodData", () => {
-    it("서버 에러시 실패", async () => {
+    it("should throw an error if the connection to the Redis server fails", async () => {
       cacheClient.hset.mockRejectedValueOnce(new Error());
+
       await expect(
         redisService.addToCacheFoodData(barcode, expect.any(Object))
       ).rejects.toThrowError(new Error());
@@ -137,7 +139,7 @@ describe("RedisService", () => {
       expect(cacheClient.expireat).toBeCalledTimes(0);
     });
 
-    it("성공", async () => {
+    it("should successfuly save food data in redis", async () => {
       const result = await redisService.addToCacheFoodData(
         barcode,
         expect.any(Object)
@@ -156,7 +158,7 @@ describe("RedisService", () => {
   });
 
   describe("getCachedFoodData", () => {
-    it("레디스 서버 접속에러", async () => {
+    it("should throw an error if the connection to the Redis server fails", async () => {
       cacheClient.hget.mockRejectedValueOnce(new Error());
 
       await expect(
@@ -166,7 +168,8 @@ describe("RedisService", () => {
       expect(cacheClient.hget).toBeCalledTimes(1);
       expect(cacheClient.hget).toBeCalledWith(barcode, barcode);
     });
-    it("성공", async () => {
+
+    it("should successfuly get food data from redis", async () => {
       cacheClient.hget.mockResolvedValueOnce(serializedData);
 
       const result = await redisService.getCachedFoodData(barcode);

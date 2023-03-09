@@ -34,5 +34,20 @@ export const MockRedisClient = () => ({
 });
 
 export const MockConfigService = () => ({
-  get: jest.fn(),
+  get: jest.fn((env: string) => {
+    if (env === "FOOD_API_URL") return process.env.FOOD_API_URL;
+    else if (env === "FOOD_API_EXTENSION")
+      return process.env.FOOD_API_EXTENSION;
+  }),
+});
+
+export const MockHttpservice = () => ({
+  get: jest.fn((query: string) => {
+    return expect.any(Object);
+  }),
+});
+
+export const MockRedisService = () => ({
+  getCachedFoodData: jest.fn(),
+  addToCacheFoodData: jest.fn(),
 });
