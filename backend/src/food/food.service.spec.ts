@@ -119,7 +119,9 @@ describe("FoodService", () => {
   });
 
   describe("getFoodDataFromApi", () => {
-    it("axios get실패시 에러발생", async () => {});
+    it("axios get실패시 에러발생", async () => {
+      // jest.spyOn(httpService, "get").mockImplementationOnce(()={});
+    });
 
     it("axios get실패시 에러발생", async () => {});
   });

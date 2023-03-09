@@ -172,25 +172,12 @@ export class AuthService {
         ],
       });
       if (!user) throw new UnauthorizedException(AUTH_UNAUTHORIZED);
-      const isMatch = await this.comparePassword(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
         const { password, ...result } = user;
         return result;
       }
       return null;
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-
-  /**
-   * Compare password as parameter and hashed password
-   * @param password
-   * @returns boolean
-   */
-  async comparePassword(password: string, hashedPassword: string) {
-    try {
-      return bcrypt.compare(password, hashedPassword);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
