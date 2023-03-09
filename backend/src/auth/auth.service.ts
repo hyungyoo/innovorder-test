@@ -8,7 +8,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
-import { AUTH_UNAUTHORIZED } from "./interfaces/auth.interface";
+import {
+  AUTH_FAIL_REMOVE_USER_TOKEN,
+  AUTH_UNAUTHORIZED,
+} from "./interfaces/auth.interface";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
@@ -63,9 +66,7 @@ export class AuthService {
         this.userRepository.create({ id, refreshToken: null })
       );
       if (!savedUser) {
-        throw new InternalServerErrorException(
-          "데이터를 저장하는데 실패하였습니다"
-        );
+        throw new InternalServerErrorException(AUTH_FAIL_REMOVE_USER_TOKEN);
       }
       return {
         success: true,
