@@ -12,20 +12,21 @@ import {
   MockRedisType,
   accessToken,
   accessTokenWithoutExp,
+  barcode,
+  serializedData,
 } from "src/common/test/unit-test.interface";
 import {
   ACCESS_TOKEN_BLACKLISTED,
   ACCESS_TOKEN_EXPIRED,
-  ACCESS_TOKEN_PAYLOAD_ERROR,
   ACCESS_TOKEN_VALUE,
+  EXP_NOT_EXISTS,
 } from "./interfaces/redis.constants";
-import { UnauthorizedException } from "@nestjs/common";
 
 describe("RedisService", () => {
   let redisService: RedisService;
   let jwtService: JwtService;
-  let redisBlacklist: MockRedisType;
-  let redisCache: MockRedisType;
+  let blacklistClient: MockRedisType;
+  let cacheClient: MockRedisType;
   let configService: ConfigService;
 
   beforeEach(async () => {
@@ -54,32 +55,32 @@ describe("RedisService", () => {
     redisService = module.get<RedisService>(RedisService);
     jwtService = module.get<JwtService>(JwtService);
     configService = module.get<ConfigService>(ConfigService);
-    redisBlacklist = module.get<MockRedisType>("REDIS_BLACKLIST_INSTANCE");
-    redisCache = module.get<MockRedisType>("REDIS_CACHE_INSTANCE");
+    blacklistClient = module.get<MockRedisType>("REDIS_BLACKLIST_INSTANCE");
+    cacheClient = module.get<MockRedisType>("REDIS_CACHE_INSTANCE");
   });
 
   it("should be defined", () => {
     expect(redisService).toBeDefined();
     expect(jwtService).toBeDefined();
     expect(configService).toBeDefined();
-    expect(redisBlacklist).toBeDefined();
-    expect(redisCache).toBeDefined();
+    expect(blacklistClient).toBeDefined();
+    expect(cacheClient).toBeDefined();
   });
 
   describe("addToBlacklist", () => {
     it("접근토큰이 블랙리스트에 등록되어있을경우 실패", async () => {
-      redisBlacklist.get.mockResolvedValueOnce(ACCESS_TOKEN_VALUE);
+      blacklistClient.get.mockResolvedValueOnce(ACCESS_TOKEN_VALUE);
 
       await expect(
         redisService.addToBlacklist(accessToken)
       ).rejects.toThrowError(ACCESS_TOKEN_BLACKLISTED);
 
-      expect(redisBlacklist.get).toBeCalledTimes(1);
-      expect(redisBlacklist.get).toHaveBeenCalledWith(accessToken);
+      expect(blacklistClient.get).toBeCalledTimes(1);
+      expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
     });
 
     it("토큰에 남아있는시간이 없다면 만료된것이므로 실패", async () => {
-      redisBlacklist.get.mockResolvedValueOnce(null);
+      blacklistClient.get.mockResolvedValueOnce(null);
       jest
         .spyOn(redisService, "getRemainingSecondsForTokenExpiry")
         .mockReturnValue(-10);
@@ -88,11 +89,11 @@ describe("RedisService", () => {
         redisService.addToBlacklist(accessToken)
       ).rejects.toThrowError(ACCESS_TOKEN_EXPIRED);
 
-      expect(redisBlacklist.get).toBeCalledTimes(1);
-      expect(redisBlacklist.get).toHaveBeenCalledWith(accessToken);
+      expect(blacklistClient.get).toBeCalledTimes(1);
+      expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
     });
     it("접근토큰이 블랙리스트에 저장되어있지않다면, 성공적으로 블랙리스트에 접근토큰 저장", async () => {
-      redisBlacklist.get.mockResolvedValueOnce(null);
+      blacklistClient.get.mockResolvedValueOnce(null);
       jest
         .spyOn(redisService, "getRemainingSecondsForTokenExpiry")
         .mockReturnValue(300);
@@ -100,28 +101,79 @@ describe("RedisService", () => {
       const result = await redisService.addToBlacklist(accessToken);
       expect(result).toBeUndefined();
 
-      expect(redisBlacklist.get).toBeCalledTimes(1);
-      expect(redisBlacklist.get).toHaveBeenCalledWith(accessToken);
+      expect(blacklistClient.get).toBeCalledTimes(1);
+      expect(blacklistClient.get).toHaveBeenCalledWith(accessToken);
     });
   });
 
   describe("getRemainingSecondsForTokenExpiry", () => {
     it("exp가 없다면 에러", () => {
-      expect(
-        redisService.getRemainingSecondsForTokenExpiry(accessTokenWithoutExp)
-      ).rejects.toThrow(UnauthorizedException);
+      const result = redisService.getRemainingSecondsForTokenExpiry(
+        accessTokenWithoutExp
+      );
+      expect(result).toBe(EXP_NOT_EXISTS);
     });
 
-    it("있다면 성공", async () => {});
+    it("있다면 성공", async () => {
+      const result =
+        redisService.getRemainingSecondsForTokenExpiry(accessToken);
+      expect(result).toBe(600);
+    });
   });
 
   describe("addToCacheFoodData", () => {
-    it.todo("서버 에러시 실패");
-    it.todo("성공");
+    it("서버 에러시 실패", async () => {
+      cacheClient.hset.mockRejectedValueOnce(new Error());
+      await expect(
+        redisService.addToCacheFoodData(barcode, expect.any(Object))
+      ).rejects.toThrowError(new Error());
+
+      expect(cacheClient.hset).toBeCalledTimes(1);
+      expect(cacheClient.hset).toBeCalledWith(
+        barcode,
+        barcode,
+        expect.any(String)
+      );
+      expect(cacheClient.expireat).toBeCalledTimes(0);
+    });
+
+    it("성공", async () => {
+      const result = await redisService.addToCacheFoodData(
+        barcode,
+        expect.any(Object)
+      );
+      expect(result).toBeUndefined();
+
+      expect(cacheClient.hset).toBeCalledTimes(1);
+      expect(cacheClient.hset).toBeCalledWith(
+        barcode,
+        barcode,
+        expect.any(String)
+      );
+      expect(cacheClient.expireat).toBeCalledTimes(1);
+      expect(cacheClient.expireat).toBeCalledWith(barcode, expect.any(Number));
+    });
   });
 
   describe("getCachedFoodData", () => {
-    it.todo("레디스 서버 접속에러");
-    it.todo("성공");
+    it("레디스 서버 접속에러", async () => {
+      cacheClient.hget.mockRejectedValueOnce(new Error());
+
+      await expect(
+        redisService.getCachedFoodData(barcode)
+      ).rejects.toThrowError(new Error());
+
+      expect(cacheClient.hget).toBeCalledTimes(1);
+      expect(cacheClient.hget).toBeCalledWith(barcode, barcode);
+    });
+    it("성공", async () => {
+      cacheClient.hget.mockResolvedValueOnce(serializedData);
+
+      const result = await redisService.getCachedFoodData(barcode);
+      expect(result).toStrictEqual(JSON.parse(serializedData));
+
+      expect(cacheClient.hget).toBeCalledTimes(1);
+      expect(cacheClient.hget).toBeCalledWith(barcode, barcode);
+    });
   });
 });

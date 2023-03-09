@@ -3,7 +3,6 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -11,8 +10,8 @@ import { Redis } from "ioredis";
 import {
   ACCESS_TOKEN_BLACKLISTED,
   ACCESS_TOKEN_EXPIRED,
-  ACCESS_TOKEN_PAYLOAD_ERROR,
   ACCESS_TOKEN_VALUE,
+  EXP_NOT_EXISTS,
 } from "./interfaces/redis.constants";
 import { OpenFoodApiOutput } from "src/food/dtos/food.dto";
 import { ConfigService } from "@nestjs/config";
@@ -65,7 +64,7 @@ export class RedisService {
       } else
         throw new HttpException(ACCESS_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new UnauthorizedException(error);
     }
   }
 
@@ -75,18 +74,9 @@ export class RedisService {
    * @returns remaining time (Seconds)
    */
   getRemainingSecondsForTokenExpiry(accessToken: string) {
-    try {
-      const payload = this.jwtService.decode(accessToken);
-      if (!payload["exp"])
-        throw new HttpException(
-          ACCESS_TOKEN_PAYLOAD_ERROR,
-          HttpStatus.UNAUTHORIZED
-        );
-      return payload["exp"] - Math.floor(Date.now() / 1000);
-    } catch (error) {
-      console.log("why?");
-      throw new InternalServerErrorException(error);
-    }
+    const payload = this.jwtService.decode(accessToken);
+    if (!payload["exp"]) return EXP_NOT_EXISTS;
+    return payload["exp"] - Math.floor(Date.now() / 1000);
   }
 
   /**
@@ -102,19 +92,15 @@ export class RedisService {
     barcode: string,
     openFoodApiOutput: OpenFoodApiOutput
   ) {
-    try {
-      const ttlFormEnv = +this.configService.get("CACHE_TTL");
-      const ttl = ttlFormEnv && ttlFormEnv > 0 ? ttlFormEnv : 600;
+    const ttlFormEnv = +this.configService.get("CACHE_TTL");
+    const ttl = ttlFormEnv && ttlFormEnv > 0 ? ttlFormEnv : 600;
 
-      const serializedData = JSON.stringify(openFoodApiOutput);
-      await this.cacheClient.hset(barcode, barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
-      await this.cacheClient.expireat(
-        barcode,
-        Math.floor(Date.now() / 1000) + ttl
-      );
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const serializedData = JSON.stringify(openFoodApiOutput);
+    await this.cacheClient.hset(barcode, barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
+    await this.cacheClient.expireat(
+      barcode,
+      Math.floor(Date.now() / 1000) + ttl
+    );
   }
 
   /**
@@ -125,11 +111,7 @@ export class RedisService {
    * @returns Food data as Object
    */
   async getCachedFoodData(barcode: string) {
-    try {
-      const serializedData = await this.cacheClient.hget(barcode, barcode);
-      return JSON.parse(serializedData);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const serializedData = await this.cacheClient.hget(barcode, barcode);
+    return JSON.parse(serializedData);
   }
 }

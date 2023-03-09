@@ -79,15 +79,21 @@ export const updateUserOutputFail = {
 
 export const accessToken = "withExp";
 
-export const accessTokenWithoutExp = "withoutExp";
-
-export const payloadWithExp = {
-  id: 1,
-  iat: "iat",
-  exp: "exp",
-};
-
 export const payloadWithoutExp = {
   id: 1,
   iat: "iat",
 };
+
+export const payloadWithExp = () => ({
+  id: 1,
+  iat: Math.floor(Date.now() / 1000) - 100,
+  exp: Math.floor(Date.now() / 1000) + 600,
+});
+
+export const accessTokenWithoutExp = "withoutExp";
+
+export const barcode = "1234";
+
+export const dataForSerialize = { a: "a" };
+
+export const serializedData = JSON.stringify(dataForSerialize);

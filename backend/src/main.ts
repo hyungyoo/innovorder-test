@@ -50,3 +50,38 @@ bootstrap();
 //     });
 //   }
 // }
+
+
+// @Catch(HttpException)
+// export class HttpExceptionFilter implements ExceptionFilter {
+//   catch(
+//     exception: HttpException,
+//     host: ArgumentsHost
+//   ): Response<HttpExceptionOutput> {
+//     const context = host.switchToHttp();
+//     const response = context.getResponse<Response>();
+//     const status = exception.getStatus();
+//     const error = exception.getResponse() as
+//       | { message: any; statusCode: number }
+//       | {
+//           statusCode: HttpStatus.BAD_REQUEST;
+//           message: string[];
+//         };
+
+//     if (
+//       typeof error !== "string" &&
+//       error.statusCode === HttpStatus.BAD_REQUEST
+//     ) {
+//       return response.status(status).json({
+//         success: false,
+//         code: error["status"],
+//         error: { message: error.message },
+//       });
+//     }
+//     return response.status(status).json({
+//       success: false,
+//       code: error["status"],
+//       error: { message: error.message },
+//     });
+//   }
+// }

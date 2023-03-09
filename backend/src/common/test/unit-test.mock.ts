@@ -1,3 +1,9 @@
+import {
+  payloadWithExp,
+  payloadWithoutExp,
+  serializedData,
+} from "./unit-test.interface";
+
 export const MockRepository = () => ({
   find: jest.fn(),
   create: jest.fn(),
@@ -6,24 +12,10 @@ export const MockRepository = () => ({
   delete: jest.fn(),
 });
 
-export const payloadWithExp = {
-  id: 1,
-  iat: "iat",
-  exp: "exp",
-};
-
-export const payloadWithoutExp = {
-  id: 1,
-  iat: "iat",
-};
-
-export const accessTokenWithoutExp = "withoutExp";
-
 export const MockJwtService = () => ({
   decode: jest.fn((accessToken: string) => {
-    console.log(accessToken);
     if (accessToken === "withoutExp") return payloadWithoutExp;
-    return payloadWithExp;
+    return payloadWithExp();
   }),
 });
 
@@ -36,7 +28,9 @@ export const MockRedisBlacklist = () => ({
 export const MockRedisClient = () => ({
   hset: jest.fn(),
   expireat: jest.fn(),
-  hget: jest.fn(),
+  hget: jest.fn((first: string, seconde: string) => {
+    return serializedData;
+  }),
 });
 
 export const MockConfigService = () => ({
