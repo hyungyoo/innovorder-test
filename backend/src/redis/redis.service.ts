@@ -1,15 +1,17 @@
 import {
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Redis } from "ioredis";
 import {
   ACCESS_TOKEN_BLACKLISTED,
-  ACCESS_TOKEN_PAYLOAD_ERROR,
+  ACCESS_TOKEN_EXPIRED,
   ACCESS_TOKEN_VALUE,
+  EXP_NOT_EXISTS,
 } from "./interfaces/redis.constants";
 import { OpenFoodApiOutput } from "src/food/dtos/food.dto";
 import { ConfigService } from "@nestjs/config";
@@ -29,17 +31,26 @@ export class RedisService {
    * 1. Receives an access token as an argument and checks if it is on the blacklist.
    * 2. After new access token is issued, the previous access token is registered on the blacklist.
    * 3. The time at which the access token is stored in Redis is calculated based on the token using getRemainingSecondsForTokenExpiry.
-   * 4. It is stored as a key-value pair.
-   * 5. The set function removes duplicates, but duplicates do not cause significant errors and a value is not required.
+   * 4. if remainning secondes is under 0, access token is expired, so unauthorized.
+   * 5. It is stored as a key-value pair.
+   * 6. The set function removes duplicates, but duplicates do not cause significant errors and a value is not required.
    * Unlike set, multiple values are not necessary.
-   * 6. The expireat function is used to specify the time-to-live (TTL).
+   * 7. The expireat function is used to specify the time-to-live (TTL).
    * @param accessToken access token
    */
   async addToBlacklist(accessToken: string) {
     try {
-      const isBlacklisted = await this.isTokenBlacklisted(accessToken);
-      if (isBlacklisted === ACCESS_TOKEN_VALUE) {
-        throw new UnauthorizedException(ACCESS_TOKEN_BLACKLISTED);
+      const blacklistedAccessToken = await this.blackListClient.get(
+        accessToken
+      );
+      if (
+        blacklistedAccessToken !== null &&
+        blacklistedAccessToken === ACCESS_TOKEN_VALUE
+      ) {
+        throw new HttpException(
+          ACCESS_TOKEN_BLACKLISTED,
+          HttpStatus.UNAUTHORIZED
+        );
       }
 
       const remainingSeconds =
@@ -50,7 +61,8 @@ export class RedisService {
           accessToken,
           Math.floor(Date.now() / 1000) + remainingSeconds
         );
-      }
+      } else
+        throw new HttpException(ACCESS_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
     } catch (error) {
       throw new UnauthorizedException(error);
     }
@@ -62,27 +74,9 @@ export class RedisService {
    * @returns remaining time (Seconds)
    */
   getRemainingSecondsForTokenExpiry(accessToken: string) {
-    try {
-      const payload = this.jwtService.decode(accessToken);
-      if (!payload["exp"])
-        throw new UnauthorizedException(ACCESS_TOKEN_PAYLOAD_ERROR);
-      return payload["exp"] - Math.floor(Date.now() / 1000);
-    } catch (error) {
-      throw new UnauthorizedException(error);
-    }
-  }
-
-  /**
-   * Checks if the access token is registered on the blacklist
-   * @param accessToken Access token
-   * @returns value of key-value : ""
-   */
-  async isTokenBlacklisted(accessToken: string) {
-    try {
-      return await this.blackListClient.get(accessToken);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const payload = this.jwtService.decode(accessToken);
+    if (!payload["exp"]) return EXP_NOT_EXISTS;
+    return payload["exp"] - Math.floor(Date.now() / 1000);
   }
 
   /**
@@ -98,19 +92,15 @@ export class RedisService {
     barcode: string,
     openFoodApiOutput: OpenFoodApiOutput
   ) {
-    try {
-      const ttlFormEnv = +this.configService.get("CACHE_TTL");
-      const ttl = ttlFormEnv && ttlFormEnv > 0 ? ttlFormEnv : 600;
+    const ttlFormEnv = +this.configService.get("CACHE_TTL");
+    const ttl = ttlFormEnv && ttlFormEnv > 0 ? ttlFormEnv : 600;
 
-      const serializedData = JSON.stringify(openFoodApiOutput);
-      await this.cacheClient.hset(barcode, barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
-      await this.cacheClient.expireat(
-        barcode,
-        Math.floor(Date.now() / 1000) + ttl
-      );
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const serializedData = JSON.stringify(openFoodApiOutput);
+    await this.cacheClient.hset(barcode, barcode, serializedData); // 직렬화된 데이터를 Redis에 저장
+    await this.cacheClient.expireat(
+      barcode,
+      Math.floor(Date.now() / 1000) + ttl
+    );
   }
 
   /**
@@ -121,11 +111,7 @@ export class RedisService {
    * @returns Food data as Object
    */
   async getCachedFoodData(barcode: string) {
-    try {
-      const serializedData = await this.cacheClient.hget(barcode, barcode);
-      return JSON.parse(serializedData);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const serializedData = await this.cacheClient.hget(barcode, barcode);
+    return JSON.parse(serializedData);
   }
 }

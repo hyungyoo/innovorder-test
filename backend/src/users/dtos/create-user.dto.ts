@@ -22,9 +22,6 @@ export class CreateUserInput extends PickType(Users, [
 export class UserWithoutPassword extends OmitType(Users, [
   "password",
   "refreshToken",
-  "hashPassword",
-  "comparePassword",
-  "hashRefreshToken",
 ]) {}
 
 /**

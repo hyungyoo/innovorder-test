@@ -14,12 +14,12 @@ import {
 } from "./dtos/create-user.dto";
 import { UpdateUserInput, UpdateUserOutput } from "./dtos/update-user.dto";
 import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
-import { CustomUserCreate } from "src/users/swaggers/create-user.decorators";
-import { CustomUserUpdate } from "src/users/swaggers/update-user.decorator";
 import { Users } from "./entities/user.entity";
 import { AccessTokenGuard } from "src/auth/guards/jwt-access.guard";
 import { AuthUser } from "src/auth/decorators/auth-user.decorator";
 import { JwtHeaderInterceptor } from "src/Interceptors/jwt.interceptor";
+import { CustomUserCreate } from "swaggers/users/create-user.decorators";
+import { CustomUserUpdate } from "swaggers/users/update-user.decorator";
 
 @ApiExtraModels(Users)
 @ApiTags("Users")

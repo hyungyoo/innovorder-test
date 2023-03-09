@@ -3,7 +3,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
 } from "@nestjs/common";
 import { Response } from "express";
 import { HttpExceptionOutput } from "./common/dtos/http-exception.output.dto";
@@ -24,27 +23,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
     const status = exception.getStatus();
-    const error = exception.getResponse() as
-      | { message: any; statusCode: number }
-      | {
-          statusCode: HttpStatus.BAD_REQUEST;
-          message: string[];
-        };
 
-    if (
-      typeof error !== "string" &&
-      error.statusCode === HttpStatus.BAD_REQUEST
-    ) {
-      return response.status(status).json({
-        success: false,
-        code: error["status"],
-        error: { message: error.message },
-      });
-    }
+    const error = exception.getResponse();
+
     return response.status(status).json({
       success: false,
-      code: error["status"],
-      error: { message: error.message },
+      code: error["status"] || error["statusCode"],
+      error: { message: error["message"] },
     });
   }
 }

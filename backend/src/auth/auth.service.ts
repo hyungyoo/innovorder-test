@@ -8,12 +8,16 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserWithoutPassword } from "src/users/dtos/create-user.dto";
 import { Users } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
-import { AUTH_UNAUTHORIZED } from "./interfaces/auth.interface";
+import {
+  AUTH_FAIL_REMOVE_USER_TOKEN,
+  AUTH_UNAUTHORIZED,
+} from "./interfaces/auth.interface";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { LoginOutput } from "./dtos/login.dto";
 import { LogoutOutput } from "./dtos/logout.dto";
 import { RefreshOutput } from "./dtos/refresh.dto";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AuthService {
@@ -62,9 +66,7 @@ export class AuthService {
         this.userRepository.create({ id, refreshToken: null })
       );
       if (!savedUser) {
-        throw new InternalServerErrorException(
-          "데이터를 저장하는데 실패하였습니다"
-        );
+        throw new InternalServerErrorException(AUTH_FAIL_REMOVE_USER_TOKEN);
       }
       return {
         success: true,
@@ -79,7 +81,7 @@ export class AuthService {
    * return success and code
    * @returns header (refresh token, access token) body (success, code)
    */
-  async refresh(): Promise<RefreshOutput> {
+  refresh(): RefreshOutput {
     return {
       success: true,
       code: HttpStatus.OK,
@@ -109,26 +111,22 @@ export class AuthService {
    * @returns [access_token, refresh_token]
    */
   generateTokens(id: number) {
-    try {
-      return Promise.all([
-        this.jwtService.signAsync(
-          { id },
-          {
-            expiresIn: this.configService.get("JWT_ACCESS_EXPIRATION_TIME"),
-            secret: this.configService.get("JWT_ACCESS_SECRET"),
-          }
-        ),
-        this.jwtService.signAsync(
-          { id },
-          {
-            expiresIn: this.configService.get("JWT_REFRESH_EXPIRATION_TIME"),
-            secret: this.configService.get("JWT_REFRESH_SECRET"),
-          }
-        ),
-      ]);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    return Promise.all([
+      this.jwtService.signAsync(
+        { id },
+        {
+          expiresIn: this.configService.get("JWT_ACCESS_EXPIRATION_TIME"),
+          secret: this.configService.get("JWT_ACCESS_SECRET"),
+        }
+      ),
+      this.jwtService.signAsync(
+        { id },
+        {
+          expiresIn: this.configService.get("JWT_REFRESH_EXPIRATION_TIME"),
+          secret: this.configService.get("JWT_REFRESH_SECRET"),
+        }
+      ),
+    ]);
   }
 
   /**
@@ -140,12 +138,8 @@ export class AuthService {
    * @returns updated user
    */
   updateHashedRefreshToken(id: number, refreshToken: string) {
-    try {
-      const user = this.userRepository.create({ id, refreshToken });
-      return this.userRepository.save(user);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    const user = this.userRepository.create({ id, refreshToken });
+    return this.userRepository.save(user);
   }
 
   /**
@@ -171,14 +165,14 @@ export class AuthService {
         ],
       });
       if (!user) throw new UnauthorizedException(AUTH_UNAUTHORIZED);
-      const isMatch = await user.comparePassword(password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
         const { password, ...result } = user;
         return result;
       }
       return null;
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new UnauthorizedException(error);
     }
   }
 }

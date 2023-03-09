@@ -1,5 +1,5 @@
 import { HttpExceptionOutput } from "src/common/dtos/http-exception.output.dto";
-import { CreateUserOutput } from "../dtos/create-user.dto";
+import { CreateUserOutput } from "../../src/users/dtos/create-user.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNumber, IsString } from "class-validator";
 import { HttpStatus } from "@nestjs/common";
@@ -9,7 +9,7 @@ import {
   USER_NOT_FOUND_RESPONSE,
   USER_UNPROCESSABLE_ENTITY,
 } from "src/users/constants/user.constants";
-import { UpdateUserOutput } from "../dtos/update-user.dto";
+import { UpdateUserOutput } from "../../src/users/dtos/update-user.dto";
 
 export class UserApiCreatedResponse extends CreateUserOutput {}
 

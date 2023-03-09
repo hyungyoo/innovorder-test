@@ -41,7 +41,7 @@ export class UsersService {
     try {
       const isEmailExists = await this.checkEmailExists(createUserInput.email);
       if (isEmailExists) {
-        throw new ConflictException("That email already exists for a user");
+        throw new ConflictException(USER_CONFLICT_RESPONSE);
       }
       const { password, refreshToken, ...createdUser } =
         await this.usersRepository.save(
@@ -76,16 +76,14 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException(USER_NOT_FOUND_RESPONSE);
       }
-
       if (updateUserInput.email) {
         const isEmailExists = await this.checkEmailExists(
           updateUserInput.email
         );
-        if (isEmailExists && user.email === updateUserInput.email) {
+        if (isEmailExists && user.email !== updateUserInput.email) {
           return this.getReturnValue();
         }
       }
-
       const { password, refreshToken, ...updatedUser } =
         await this.usersRepository.save(
           this.usersRepository.create({ ...user, ...updateUserInput })
@@ -102,22 +100,18 @@ export class UsersService {
    * @returns success (boolean), code (number),  data or error
    */
   getReturnValue(user?: UserWithoutPassword) {
-    try {
-      if (user) {
-        return {
-          success: true,
-          code: HttpStatus.OK,
-          data: { user },
-        };
-      } else {
-        return {
-          success: true,
-          code: HttpStatus.CONFLICT,
-          error: { message: USER_CONFLICT_RESPONSE },
-        };
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(error);
+    if (user) {
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        data: { user },
+      };
+    } else {
+      return {
+        success: false,
+        code: HttpStatus.CONFLICT,
+        error: { message: USER_CONFLICT_RESPONSE },
+      };
     }
   }
 
@@ -141,10 +135,6 @@ export class UsersService {
    * @returns Users or null
    */
   findUserById(id: number) {
-    try {
-      return this.usersRepository.findOne({ where: { id } });
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    return this.usersRepository.findOne({ where: { id } });
   }
 }

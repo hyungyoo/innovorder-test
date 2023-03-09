@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { firstValueFrom } from "rxjs";
 import { RedisService } from "src/redis/redis.service";
 import { OpenFoodApiOutput } from "./dtos/food.dto";
 import { FoodOutput } from "./dtos/find.food.dto";
@@ -30,8 +29,8 @@ export class FoodService {
    */
   async findFoodByBarcode(barcode: string): Promise<FoodOutput> {
     try {
-      const isCachedData = await this.redisService.getCachedFoodData(barcode);
-      if (isCachedData) return this.getReturnValue(isCachedData);
+      const cachedData = await this.redisService.getCachedFoodData(barcode);
+      if (cachedData) return this.getReturnValue(cachedData);
 
       const openFoodApiOutput: OpenFoodApiOutput =
         await this.getFoodDataFromApi(barcode);
@@ -47,23 +46,19 @@ export class FoodService {
    * @param data OpenFoodApiOut
    * @returns
    */
-  async getReturnValue(data: OpenFoodApiOutput) {
-    try {
-      if (data.product) {
-        return {
-          success: true,
-          code: HttpStatus.OK,
-          data: { product: data.product },
-        };
-      } else {
-        return {
-          success: false,
-          code: HttpStatus.NOT_FOUND,
-          error: { message: data.status_verbose },
-        };
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(error);
+  getReturnValue(data: OpenFoodApiOutput) {
+    if (data.product) {
+      return {
+        success: true,
+        code: HttpStatus.OK,
+        data: { product: data.product },
+      };
+    } else {
+      return {
+        success: false,
+        code: HttpStatus.NOT_FOUND,
+        error: { message: data.status_verbose },
+      };
     }
   }
 
@@ -76,9 +71,10 @@ export class FoodService {
     try {
       const url = this.configService.get("FOOD_API_URL");
       const extention = this.configService.get("FOOD_API_EXTENTSION");
-      const openFoodFactsDto: OpenFoodApiOutput = await firstValueFrom(
-        this.httpService.get(`${url}/${barcode}/${extention}`).pipe()
-      ).then((res) => res.data);
+      const openFoodFactsDto: OpenFoodApiOutput =
+        await this.httpService.axiosRef
+          .get(`${url}/${barcode}/${extention}`)
+          .then((res) => res.data);
       return openFoodFactsDto;
     } catch (error) {
       throw new InternalServerErrorException(error);
